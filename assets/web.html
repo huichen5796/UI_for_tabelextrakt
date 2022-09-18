@@ -103,15 +103,15 @@
     <div class="menu-box">
         <div class="menu-title">MENU</div>
 
-        <form action="">
-            <div class="menu-item">--model to use--</div>
-            <div class="menu-opt">
-                <input type="radio" name="model" value="model-densenet" checked="checked">densenet
-                <input type="radio" name="model" value="model-unet">unet<br>
-                <input type="submit" value="RUN" class="menu-button"> <!-- upload the form -->
-            </div>
+        <form action="/run" method="post">
             <div class="menu-item">--upload folder--</div>
             <input type="file" id="input" webkitdirectory />
+            <div class="menu-item">--model to use--</div>
+            <div class="menu-opt">
+                <input type="checkbox" name="model" value="model-densenet">densenet
+                <input type="checkbox" name="model" value="model-unet">unet<br>
+                <input type="submit" value="RUN" class="menu-button"> <!-- upload the form -->
+            </div>
         </form>
 
         <form action="">
