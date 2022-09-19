@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>tabellen-extraktor</title>
+    <script src="http://127.0.0.1:3000/run">
+        $('body').append(location.search)
+    </script>
     <style>
         .title {
             position: fixed;
@@ -92,7 +95,7 @@
             border-color: black;
         }
     </style>
-
+    
 </head>
 
 <body>
@@ -103,7 +106,8 @@
     <div class="menu-box">
         <div class="menu-title">MENU</div>
 
-        <form action="/run" method="post">
+        <iframe  width=0 height=0 frameborder=0 id="myiframe" name="myiframe"></iframe>
+        <form action="/run" method="post" target="myiframe">
             <div class="menu-item">--upload folder--</div>
             <input type="file" id="input" webkitdirectory />
             <div class="menu-item">--model to use--</div>
@@ -113,7 +117,7 @@
                 <input type="submit" value="RUN" class="menu-button"> <!-- upload the form -->
             </div>
         </form>
-
+        
         <form action="">
             <div class="menu-item">--search in Elasticsearch--</div>
             <div class="menu-opt">
@@ -132,7 +136,7 @@
     </div>
 
     <div class="work-place">
-
+        <p th:text="${msg}" style="color: red" ></p><p th:text="${'body'}" style="color: red" ></p>
     </div>
 
 

@@ -2,12 +2,11 @@ const express = require('express');    /*ähnlich wie import in Python*/
 const hostname = '127.0.0.1'
 const port = 3000;
 const router = require('./router/router.js')
-const path = require('path');
-const url = require('url');
-const read_file = require('./assets/readfile.js');
+const cors = require('cors')
 
 const app = express();
 
+app.use(cors())
 /* Erstellen einen statischen Ressourcenserver */
 app.use(express.static('assets'));
 app.use(express.json());
