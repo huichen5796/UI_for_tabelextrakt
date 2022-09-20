@@ -16,7 +16,7 @@ app.use(router)
 
 /* Generieren eine anfängliche statische Seite */
 app.get('/', (req, res) => {
-  res.sendFile( "D:/batch_drawing/assets/web.html");
+  res.sendFile("D:/batch_drawing/assets/web.html");
 });
 
 app.use(function (err, req, res, next) {

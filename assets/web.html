@@ -3,9 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>tabellen-extraktor</title>
-    <script src="http://127.0.0.1:3000/run">
-        $('body').append(location.search)
-    </script>
     <style>
         .title {
             position: fixed;
@@ -41,7 +38,7 @@
         }
 
         .menu-box {
-            width: 250px;
+            width: 270px;
             height: 90%;
             position: fixed;
             left: 50px;
@@ -50,7 +47,7 @@
             border-right: solid;
             border-right-width: thin;
             border-color: black;
-            padding-right: 50px;
+            padding-right: 30px;
         }
 
         .menu-button {
@@ -95,7 +92,7 @@
             border-color: black;
         }
     </style>
-    
+
 </head>
 
 <body>
@@ -106,8 +103,8 @@
     <div class="menu-box">
         <div class="menu-title">MENU</div>
 
-        <iframe  width=0 height=0 frameborder=0 id="myiframe" name="myiframe"></iframe>
-        
+        <iframe width=0 height=0 frameborder=0 id="myiframe" name="myiframe"></iframe>
+
         <form action="/run" method="post" target="myiframe">
             <div class="menu-item">--upload folder--</div>
             <input type="file" name='file' id="input" webkitdirectory />
@@ -118,27 +115,67 @@
                 <input type="submit" value="RUN" class="menu-button"> <!-- upload the form -->
             </div>
         </form>
-        
-        <form action="/returnSearch" method="post" target="myiframe">
-            <div class="menu-item">--search in Elasticsearch--</div>
-            <div class="menu-opt">
-                search index:
-                <select name="idx">
-                    <option value="table" selected>table</option>
-                </select><br>
-                search label:
-                <select name="label">
-                    <option value="--none--" selected>--none--</option>
-                    <option value="table_1_of_test4.jpg">table_1_of_test4.jpg</option>
-                </select>
-            </div>
 
-            <input type="submit" value="START" class="menu-button"> <!-- upload the form -->
-        </form>
+
+        <div class="menu-item">--search in Elasticsearch--</div>
+        <div class="menu-opt">
+            search index:
+            <select id="idx">
+                <option value="table" selected>table</option>
+            </select><br>
+            search label:
+            <select id="label">
+                <option value="--none--" selected>--none--</option>
+                <option value="table_1_of_test4.jpg">table_1_of_test4.jpg</option>
+            </select>
+        </div>
+
+        <input type="button" value="SEARCH" id="btnSearch" class="menu-button">
+
+        <script type="text/javascript">
+            const btnSearch = document.getElementById('btnSearch')
+            const idx = document.getElementById('idx')
+            const label = document.getElementById('label')
+
+            btnSearch.onclick = function () {
+                const xhr = new XMLHttpRequest()
+                const idxValue = idx.value
+                const labelValue = label.value
+                const params = 'idx=' + idxValue + '&label=' + labelValue
+                xhr.open('post', '/returnSearch')
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+                xhr.send(params)
+                xhr.onload = function () {
+                    console.log(xhr.responseText)
+                }
+            }
+        </script>
+
+        <input type="button" value="RENEW" id="btnRenew">
+        <script type="text/javascript">
+            const btnRenew = document.getElementById('btnRenew')
+
+            const list = ['dsasd', 'dsadas', 'ddsasdqwe']
+
+            btnRenew.onclick = function () {
+                for (let i=0;i<list.length;i++) {
+                    var label_new = list[i]
+                    var board = document.getElementById("label");
+                    var e = document.createElement("option");
+                    e.value = "sdasdas";
+                    e.text = label_new
+                    var object = board.appendChild(e);
+                }
+
+            }
+        </script>
+
+
+
     </div>
 
     <div class="work-place">
-        
+
     </div>
 
 

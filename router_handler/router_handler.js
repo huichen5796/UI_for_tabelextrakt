@@ -1,6 +1,8 @@
-
 const spawn = require('child_process').spawn
 
+exports.forAjax = (req, res) => {
+    res.send({'name':'das'})
+}
 
 exports.runPy = (req, res) => {
     const body = req.body
@@ -58,11 +60,11 @@ exports.returnSearch = (req, res) => {
         const py = spawn('python', ['main.py', searchJSON])
 
         /* Output the print content in the py file */
-        py.stdout.on('data', function(res){
-            let data = JSON.parse(res.toString())
+        py.stdout.on('data', function(resultSearch){
+            const data = JSON.parse(resultSearch.toString())
             console.log(data)
-         })
-
+            res.send(data)
+        })
     }
     else {
 
