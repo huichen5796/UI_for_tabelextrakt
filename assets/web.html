@@ -109,7 +109,7 @@
         <iframe  width=0 height=0 frameborder=0 id="myiframe" name="myiframe"></iframe>
         <form action="/run" method="post" target="myiframe">
             <div class="menu-item">--upload folder--</div>
-            <input type="file" id="input" webkitdirectory />
+            <input type="file" name='file' id="input" webkitdirectory />
             <div class="menu-item">--model to use--</div>
             <div class="menu-opt">
                 <input type="checkbox" name="model" value="model-densenet">densenet
@@ -136,7 +136,7 @@
     </div>
 
     <div class="work-place">
-        <p th:text="${msg}" style="color: red" ></p><p th:text="${'body'}" style="color: red" ></p>
+        
     </div>
 
 

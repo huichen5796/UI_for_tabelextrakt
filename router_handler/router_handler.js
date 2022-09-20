@@ -1,12 +1,17 @@
+
 const spawn = require('child_process').spawn
 
 
 exports.runPy = (req, res) => {
     const body = req.body
-    if (body.model) {
+    if (body.model&&body.file) {
         console.log('model to use: ' + body.model)
-
-        const py = spawn('python', ['main.py', body.model])
+        const run = {
+            'file':body.file,
+            'model':body.model
+        }
+        const runJSON = JSON.stringify(run)
+        const py = spawn('python', ['main.py', runJSON])
 
         /* Output the print content in the py file */
         let output="";
@@ -19,7 +24,16 @@ exports.runPy = (req, res) => {
         
     }
     else {
-        console.log('No model selected')
+        if (!body.model&body.file){
+            console.log('No model selected')
+        }
+        if (!body.file&&body.model) {
+            console.log('No file selected')
+        }
+        if (!body.model&&!body.file){
+            console.log('Please upload files and select a model to use')
+        }
+        
     }
 }
 
