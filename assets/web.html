@@ -107,6 +107,7 @@
         <div class="menu-title">MENU</div>
 
         <iframe  width=0 height=0 frameborder=0 id="myiframe" name="myiframe"></iframe>
+        
         <form action="/run" method="post" target="myiframe">
             <div class="menu-item">--upload folder--</div>
             <input type="file" name='file' id="input" webkitdirectory />
@@ -118,16 +119,17 @@
             </div>
         </form>
         
-        <form action="">
+        <form action="/returnSearch" method="post" target="myiframe">
             <div class="menu-item">--search in Elasticsearch--</div>
             <div class="menu-opt">
                 search index:
-                <select>
-                    <option value="table">table</option>
+                <select name="idx">
+                    <option value="table" selected>table</option>
                 </select><br>
                 search label:
-                <select>
-                    <option value="--none--">--none--</option>
+                <select name="label">
+                    <option value="--none--" selected>--none--</option>
+                    <option value="table_1_of_test4.jpg">table_1_of_test4.jpg</option>
                 </select>
             </div>
 

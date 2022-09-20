@@ -4,9 +4,9 @@ const router_handler = require('../router_handler/router_handler.js')
 
 router.post('/run', router_handler.runPy)
 
-router.get('/tableInEla', router_handler.outTable)
+router.post('/return', router_handler.returnTable)
 
-
+router.post('/returnSearch', router_handler.returnSearch)
 
 
 module.exports = router;
