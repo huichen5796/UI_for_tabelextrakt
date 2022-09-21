@@ -1,10 +1,26 @@
 const spawn = require('child_process').spawn
+const formidable = require('formidable')
+const path = require('path')
 
-exports.forAjax = (req, res) => {
-    res.send({ 'name': 'das' })
+exports.upload = (req, res) => {
+    const form = new formidable.IncomingForm()
+    form.uploadDir = path.join(__dirname, 'assets', 'uploads')
+
+    form.keepExtenSions = true
+    form.parse(req, (err, fields, files) => {
+        res.send({
+            path:files.attrName.filepath.split('assets')[1]
+        })
+    })
 }
 
 exports.runPy = (req, res) => {
+    const form = new formidable.IncomingForm()
+    form.parse(req, (err, fields, files) => {
+        res.send(fields)
+
+    })
+
     const body = req.body
     if (body.model && body.file) {
 
@@ -18,29 +34,11 @@ exports.runPy = (req, res) => {
         const py = spawn('python', ['main.py', runJSON])
 
         /* Output the print content in the py file */
-        let output = "";
-        py.stdout.on("data", (data) => {
-            output += data.toString();
-        });
-        py.on("close", () => {
-            console.log(output);
-        });
-
-    }
-    else {
-        if (!body.model & body.file) {
-            console.log('No model selected')
-            
-        }
-        if (!body.file && body.model) {
-            console.log('No file selected')
-            
-        }
-        if (!body.model && !body.file) {
-            console.log('Please upload files and select a model to use')
-            
-        }
-
+        py.stdout.on('data', function (resultSearch) {
+            const data = JSON.parse(resultSearch.toString())
+            console.log(data)
+            res.send(data)
+        })
     }
 }
 

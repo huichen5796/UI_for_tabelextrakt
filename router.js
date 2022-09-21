@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const router_handler = require('../router_handler/router_handler.js') 
+const router_handler = require('./router_handler.js') 
 
-router.get('/responseData', router_handler.forAjax)
+router.post('/upload', router_handler.upload)
 
 router.post('/run', router_handler.runPy)
 

@@ -102,6 +102,32 @@
             border-color: black;
         }
 
+        .wp-left {
+            position: absolute;
+            top: 10%;
+            margin-bottom: 5%;
+            margin-left: 2.5%;
+            height: 80%;
+            width: 45%;
+            border-radius: 5px;
+            border: solid;
+            border-width: thin;
+            border-color: black;
+        }
+
+        .wp-right {
+            position: absolute;
+            top: 10%;
+            margin-bottom: 5%;
+            right: 2.5%;
+            height: 80%;
+            width: 45%;
+            border-radius: 5px;
+            border: solid;
+            border-width: thin;
+            border-color: black;
+        }
+
         .table {
             margin: 40 auto;
             border: 2px solid black;
@@ -115,6 +141,26 @@
             padding: 5px;
 
         }
+
+        .progress {
+            height: 5px;
+            width: 70%;
+            margin-top: 10px;
+            background-color: bisque;
+
+        }
+
+        .progress-bar {
+            height: 5px;
+            background-color: rgb(230, 165, 15);
+        }
+
+        .bar-number {
+            font-size: 10px;
+            font-family: Arial;
+            font-weight: bold;
+            color: rgb(230, 165, 15);
+        }
     </style>
 
 </head>
@@ -125,21 +171,80 @@
     <div class="label"><img src="label.jpg" width="50px" height="50px" /></div>
 
     <div class="menu-box">
-        <div class="menu-title">MENU</div>
 
-        <iframe width=0 height=0 frameborder=0 id="myiframe" name="myiframe"></iframe>
-
-        <form action="/run" method="post" target="myiframe">
+        <form id="uploader">
+            <div class="menu-title">MENU</div>
             <div class="menu-item">--upload folder--</div>
-            <input type="file" name='file' id="input" webkitdirectory />
+            <input type="file" name='file' id="file" />
+            <div class="progress">
+                <div id='bar' class="progress-bar" style="width:0%;"></div>
+            </div>
+            <div id='bar-number' class="bar-number">0%</div>
+
             <div class="menu-item">--model to use--</div>
             <div class="menu-opt">
-                <input type="checkbox" name="model" value="model-densenet">densenet
-                <input type="checkbox" name="model" value="model-unet">unet<br>
-                <input type="submit" value="RUN" class="menu-button"> <!-- upload the form -->
+                <input type="checkbox" name='model' id="model" value="densenet">densenet
+                <input type="checkbox" name='model' id="model" value="unet">unet<br>
+                <input type="button" value="RUN" id="btnRun" class="menu-button">
             </div>
         </form>
+        <script type="text/javascript">
+            const btnRun = document.getElementById('btnRun')
+            const uploader = document.getElementById('uploader')
+            const fileUp = document.getElementById('file')
 
+            fileUp.onchange = function () {
+                const xhr = new XMLHttpRequest()
+                var f = new FormData()
+                f.append('attrName', this.files[0])
+                xhr.open('post', '/upload')
+
+                xhr.upload.onprogress = function (ev) {
+                    var result = (ev.loaded / ev.total) * 100 + '%'
+                    var bar = document.getElementById('bar')
+                    var barNumber = document.getElementById('bar-number')
+                    bar.style.width = result
+                    barNumber.innerHTML = result
+                }
+
+                xhr.send(f)
+                
+                xhr.onload = function () {
+                    if (xhr.status == 200) {
+                        var result = JSON.parse(xhr.responseText)
+                        var img = document.createElement('img')
+                        img.src = result.path
+                        img.onload = function () {
+                            var wp_left = document.getElementById('wp-left')
+                            wp_left.appendChild(img)
+                        }
+                    }
+                }
+            }
+
+            btnRun.onclick = function () {
+                var formData = new FormData(uploader)
+
+                if (formData.get('file').name != "" && formData.get('model') != null) {
+                    const xhr = new XMLHttpRequest()
+                    xhr.open('post', '/run')
+                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+                    xhr.send(formData)
+                    xhr.onload = function () {
+                        console.log(JSON.parse(xhr.responseText))
+                    }
+                }
+                else if (formData.get('file').name == "" && formData.get('model') != null) {
+                    alert('No file uploaded')
+                }
+                else if (formData.get('file').name != "" && formData.get('model') == null) {
+                    alert('No model selected')
+                }
+                else if (formData.get('file').name == "" && formData.get('model') == null) {
+                    alert('Please upload files and select model to use')
+                }
+            }
+        </script>
 
         <div class="menu-item">--search in Elasticsearch--</div>
         <div class="menu-opt">
@@ -204,7 +309,7 @@
 
         </script>
 
-        <input type="button" value="GET LABEL" id="btnRenew" style="margin-top:10px">
+        <input type="button" value="GET LABEL" id="btnRenew" class="menu-button">
         <script type="text/javascript">
             const btnRenew = document.getElementById('btnRenew')
             btnRenew.onclick = function () {
@@ -234,7 +339,7 @@
                             e.text = label_new
                             var object = board.appendChild(e);
                         }
-                        else {}
+                        else { }
                     }
                 }
             }
@@ -245,7 +350,12 @@
     </div>
 
     <div id='workplace' class="work-place">
+        <div id='wp-left' class="wp-left">
 
+        </div>
+        <div id='wp-right' class="wp-right">
+
+        </div>
     </div>
 
 
