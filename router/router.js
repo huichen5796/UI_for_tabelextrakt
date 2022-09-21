@@ -10,4 +10,6 @@ router.post('/return', router_handler.returnTable)
 
 router.post('/returnSearch', router_handler.returnSearch)
 
+router.post('/searchLabel', router_handler.searchLabel)
+
 module.exports = router;

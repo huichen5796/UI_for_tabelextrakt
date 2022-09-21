@@ -1,7 +1,7 @@
 const spawn = require('child_process').spawn
 
 exports.forAjax = (req, res) => {
-    res.send({'name':'das'})
+    res.send({ 'name': 'das' })
 }
 
 exports.runPy = (req, res) => {
@@ -9,7 +9,7 @@ exports.runPy = (req, res) => {
     if (body.model && body.file) {
 
         const run = {
-            'todo':'run',
+            'todo': 'run',
             'file': body.file,
             'model': body.model
         }
@@ -46,12 +46,12 @@ exports.returnTable = (req, res) => {
     console.log(res.body)
 }
 
-exports.returnSearch = (req, res) => {  
+exports.returnSearch = (req, res) => {
     const body = req.body
     if (body.label != '--none--') {
 
         const search = {
-            'todo':'search',
+            'todo': 'search',
             'idx': body.idx,
             'label': body.label
         }
@@ -60,7 +60,7 @@ exports.returnSearch = (req, res) => {
         const py = spawn('python', ['main.py', searchJSON])
 
         /* Output the print content in the py file */
-        py.stdout.on('data', function(resultSearch){
+        py.stdout.on('data', function (resultSearch) {
             const data = JSON.parse(resultSearch.toString())
             console.log(data)
             res.send(data)
@@ -72,4 +72,23 @@ exports.returnSearch = (req, res) => {
 
 
     }
+}
+
+exports.searchLabel = (req, res) => {
+    const body = req.body
+    const search = {
+        'todo': 'search',
+        'idx': body.idx,
+        'label': body.label
+    }
+    console.log(search)
+    const searchJSON = JSON.stringify(search)
+    const py = spawn('python', ['main.py', searchJSON])
+
+    /* Output the print content in the py file */
+    py.stdout.on('data', function (resultSearch) {
+        const data = resultSearch.toString()
+        console.log(data)
+        res.send(data)
+    })
 }

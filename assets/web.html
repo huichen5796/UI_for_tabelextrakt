@@ -51,7 +51,6 @@
         }
 
         .menu-button {
-            background: rgb(230, 165, 15);
             width: 100px;
             height: 30px;
             display: flex;
@@ -62,8 +61,19 @@
             font-family: Arial;
             font-weight: bold;
             border-radius: 25px;
-            color: aliceblue;
             margin-top: 10px;
+            -webkit-transition-duration: 0.4s;
+            transition-duration: 0.4s;
+            text-align: center;
+            background-color: white;
+            color: rgb(230, 165, 15);
+            border: 2px solid rgb(230, 165, 15);
+            border-radius: 5px;
+        }
+
+        .menu-button:hover {
+            background-color: rgb(230, 165, 15);
+            color: white;
         }
 
         .menu-item {
@@ -90,6 +100,20 @@
             border: solid;
             border-width: thin;
             border-color: black;
+        }
+
+        .table {
+            margin: 40 auto;
+            border: 2px solid black;
+            border-collapse: collapse;
+            border-spacing: 0px;
+        }
+
+        .cell {
+            text-align: center;
+            border: 1px solid black;
+            padding: 5px;
+
         }
     </style>
 
@@ -126,7 +150,6 @@
             search label:
             <select id="label">
                 <option value="--none--" selected>--none--</option>
-                <option value="table_1_of_test4.jpg">table_1_of_test4.jpg</option>
             </select>
         </div>
 
@@ -146,27 +169,65 @@
                 xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
                 xhr.send(params)
                 xhr.onload = function () {
-                    console.log(xhr.responseText)
+                    var txt = ''
+                    myObj = JSON.parse(xhr.responseText);
+
+                    txt += "<table " + "class='table'>"
+                    txt += "<tr>"
+                    for (var header in myObj['col0']) {
+                        txt += "<th " + "class='cell'>" + header + "<th>"
+                    }
+                    txt += "<tr>"
+                    for (var x in myObj) {
+                        var para = "<td " + "class='cell'>"
+                        var inhalt = myObj[x]
+
+                        n = 0
+                        for (var xx in inhalt) {
+                            if (n == 0) {
+                                txt = txt + '<tr>' + para + inhalt[xx] + para
+                            } else {
+                                if (n != inhalt.length - 1) {
+                                    txt += para + inhalt[xx] + para
+                                } else {
+                                    txt += para + inhalt[xx] + para + '<tr>'
+                                }
+                            }
+                            n++
+                        }
+                    }
+                    txt += "</table>"
+                    document.getElementById("workplace").innerHTML = txt;
+                    console.log(txt)
                 }
             }
+
         </script>
 
-        <input type="button" value="RENEW" id="btnRenew">
+        <input type="button" value="RENEW" id="btnRenew" style="margin-top:10px">
         <script type="text/javascript">
             const btnRenew = document.getElementById('btnRenew')
-
-            const list = ['dsasd', 'dsadas', 'ddsasdqwe']
-
             btnRenew.onclick = function () {
-                for (let i=0;i<list.length;i++) {
-                    var label_new = list[i]
-                    var board = document.getElementById("label");
-                    var e = document.createElement("option");
-                    e.value = "sdasdas";
-                    e.text = label_new
-                    var object = board.appendChild(e);
-                }
+                const xhr = new XMLHttpRequest()
+                const idxValue = idx.value
+                const labelValue = 'all'
+                const params = 'idx=' + idxValue + '&label=' + labelValue
+                xhr.open('post', '/searchLabel')
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+                xhr.send(params)
+                xhr.onload = function () {
 
+                    const label_list = eval(xhr.responseText)
+                    for (let i = 0; i < label_list.length; i++) {
+                        var label_new = label_list[i]
+                        var board = document.getElementById("label");
+                        var e = document.createElement("option");
+                        e.value = "sdasdas";
+                        e.text = label_new
+                        var object = board.appendChild(e);
+                    }
+
+                }
             }
         </script>
 
@@ -174,7 +235,7 @@
 
     </div>
 
-    <div class="work-place">
+    <div id='workplace' class="work-place">
 
     </div>
 
