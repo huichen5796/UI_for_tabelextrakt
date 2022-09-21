@@ -30,12 +30,15 @@ exports.runPy = (req, res) => {
     else {
         if (!body.model & body.file) {
             console.log('No model selected')
+            
         }
         if (!body.file && body.model) {
             console.log('No file selected')
+            
         }
         if (!body.model && !body.file) {
             console.log('Please upload files and select a model to use')
+            
         }
 
     }
@@ -88,7 +91,7 @@ exports.searchLabel = (req, res) => {
     /* Output the print content in the py file */
     py.stdout.on('data', function (resultSearch) {
         const data = resultSearch.toString()
-        console.log(data)
+        console.log('Add labels ' + data)
         res.send(data)
     })
 }

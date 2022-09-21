@@ -204,7 +204,7 @@
 
         </script>
 
-        <input type="button" value="RENEW" id="btnRenew" style="margin-top:10px">
+        <input type="button" value="GET LABEL" id="btnRenew" style="margin-top:10px">
         <script type="text/javascript">
             const btnRenew = document.getElementById('btnRenew')
             btnRenew.onclick = function () {
@@ -217,16 +217,25 @@
                 xhr.send(params)
                 xhr.onload = function () {
 
-                    const label_list = eval(xhr.responseText)
-                    for (let i = 0; i < label_list.length; i++) {
-                        var label_new = label_list[i]
-                        var board = document.getElementById("label");
-                        var e = document.createElement("option");
-                        e.value = "sdasdas";
-                        e.text = label_new
-                        var object = board.appendChild(e);
+                    var label_list = eval(xhr.responseText)
+                    var label_oldoptions = document.getElementById('label').options
+                    var label_old = []
+                    for (let i = 0; i < label_oldoptions.length; i++) {
+                        label_old.push(label_oldoptions[i].value)
                     }
+                    console.log(label_old)
 
+                    for (let i = 0; i < label_list.length; i++) {
+                        if (label_old.indexOf(label_list[i]) === -1) {
+                            var label_new = label_list[i]
+                            var board = document.getElementById("label");
+                            var e = document.createElement("option");
+                            e.value = label_new
+                            e.text = label_new
+                            var object = board.appendChild(e);
+                        }
+                        else {}
+                    }
                 }
             }
         </script>
