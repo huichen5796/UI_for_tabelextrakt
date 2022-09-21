@@ -9,7 +9,8 @@ exports.upload = (req, res) => {
     form.keepExtenSions = true
     form.parse(req, (err, fields, files) => {
         res.send({
-            path:files.attrName.filepath.split('assets')[1]
+            path:files.attrName.filepath.split('assets')[1],
+            fileName:files.attrName.filepath.split("uploads\\")[1]
         })
     })
 }

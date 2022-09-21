@@ -175,12 +175,18 @@
         <form id="uploader">
             <div class="menu-title">MENU</div>
             <div class="menu-item">--upload folder--</div>
-            <input type="file" name='file' id="file" />
+            <input type="file" name='file' id="file"/>
             <div class="progress">
                 <div id='bar' class="progress-bar" style="width:0%;"></div>
             </div>
             <div id='bar-number' class="bar-number">0%</div>
 
+            <div class="menu-opt">
+                file list:
+                <select id="image">
+                    <option value="--none--" selected>--none--</option>
+                </select><br>
+            </div>
             <div class="menu-item">--model to use--</div>
             <div class="menu-opt">
                 <input type="checkbox" name='model' id="model" value="densenet">densenet
@@ -208,23 +214,31 @@
                 }
 
                 xhr.send(f)
-                
+
                 xhr.onload = function () {
                     if (xhr.status == 200) {
-                        var result = JSON.parse(xhr.responseText)
+
+                        /*var result = JSON.parse(xhr.responseText)
                         var img = document.createElement('img')
                         img.src = result.path
                         img.onload = function () {
                             var wp_left = document.getElementById('wp-left')
                             wp_left.appendChild(img)
-                        }
+                        }*/
+
+                        var board = document.getElementById("image");
+                        var e = document.createElement("option");
+                        e.value = result.fileName
+                        e.text = result.fileName
+                        var object = board.appendChild(e);
+
                     }
                 }
             }
 
             btnRun.onclick = function () {
                 var formData = new FormData(uploader)
-
+                formData.delete('')
                 if (formData.get('file').name != "" && formData.get('model') != null) {
                     const xhr = new XMLHttpRequest()
                     xhr.open('post', '/run')
@@ -328,7 +342,6 @@
                     for (let i = 0; i < label_oldoptions.length; i++) {
                         label_old.push(label_oldoptions[i].value)
                     }
-                    console.log(label_old)
 
                     for (let i = 0; i < label_list.length; i++) {
                         if (label_old.indexOf(label_list[i]) === -1) {
