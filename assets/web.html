@@ -175,7 +175,7 @@
         <form id="uploader">
             <div class="menu-title">MENU</div>
             <div class="menu-item">--upload folder--</div>
-            <input type="file" name='file' id="file"/>
+            <input type="file" name='file' id="file" />
             <div class="progress">
                 <div id='bar' class="progress-bar" style="width:0%;"></div>
             </div>
@@ -183,7 +183,7 @@
 
             <div class="menu-opt">
                 file list:
-                <select id="image">
+                <select id="image" name="'image">
                     <option value="--none--" selected>--none--</option>
                 </select><br>
             </div>
@@ -198,6 +198,7 @@
             const btnRun = document.getElementById('btnRun')
             const uploader = document.getElementById('uploader')
             const fileUp = document.getElementById('file')
+            const imageSearch = document.getElementById('image')
 
             fileUp.onchange = function () {
                 const xhr = new XMLHttpRequest()
@@ -218,14 +219,7 @@
                 xhr.onload = function () {
                     if (xhr.status == 200) {
 
-                        /*var result = JSON.parse(xhr.responseText)
-                        var img = document.createElement('img')
-                        img.src = result.path
-                        img.onload = function () {
-                            var wp_left = document.getElementById('wp-left')
-                            wp_left.appendChild(img)
-                        }*/
-
+                        var result = JSON.parse(xhr.responseText)
                         var board = document.getElementById("image");
                         var e = document.createElement("option");
                         e.value = result.fileName
@@ -236,26 +230,46 @@
                 }
             }
 
-            btnRun.onclick = function () {
-                var formData = new FormData(uploader)
-                formData.delete('')
-                if (formData.get('file').name != "" && formData.get('model') != null) {
-                    const xhr = new XMLHttpRequest()
-                    xhr.open('post', '/run')
-                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
-                    xhr.send(formData)
-                    xhr.onload = function () {
-                        console.log(JSON.parse(xhr.responseText))
+            imageSearch.onchange = function () {
+                const xhr = new XMLHttpRequest()
+                const imageValue = imageSearch.value
+                const params = 'image=' + imageValue
+                xhr.open('post', '/imageOriShow')
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+                xhr.send(params)
+                xhr.onload = function () {
+                    if (xhr.status == 200) {
+
+                        var result = JSON.parse(xhr.responseText)
+                        var img = document.createElement('img')
+                        img.src = result.path
+                        img.onload = function () {
+                            var wp_left = document.getElementById('wp-left')
+                            wp_left.appendChild(img)
+                        }
                     }
                 }
-                else if (formData.get('file').name == "" && formData.get('model') != null) {
-                    alert('No file uploaded')
-                }
-                else if (formData.get('file').name != "" && formData.get('model') == null) {
-                    alert('No model selected')
-                }
-                else if (formData.get('file').name == "" && formData.get('model') == null) {
-                    alert('Please upload files and select model to use')
+                btnRun.onclick = function () {
+                    var formData = new FormData(uploader)
+
+                    if (formData.get('file').name != "" && formData.get('model') != null) {
+                        const xhr = new XMLHttpRequest()
+                        xhr.open('post', '/run')
+                        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+                        xhr.send(formData)
+                        xhr.onload = function () {
+                            console.log(JSON.parse(xhr.responseText))
+                        }
+                    }
+                    else if (formData.get('file').name == "" && formData.get('model') != null) {
+                        alert('No file uploaded')
+                    }
+                    else if (formData.get('file').name != "" && formData.get('model') == null) {
+                        alert('No model selected')
+                    }
+                    else if (formData.get('file').name == "" && formData.get('model') == null) {
+                        alert('Please upload files and select model to use')
+                    }
                 }
             }
         </script>
@@ -288,36 +302,40 @@
                 xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
                 xhr.send(params)
                 xhr.onload = function () {
-                    var txt = ''
-                    myObj = JSON.parse(xhr.responseText);
+                    if (labelValue != '--none--') {
+                        var txt = ''
+                        myObj = JSON.parse(xhr.responseText);
 
-                    txt += "<table " + "class='table'>"
-                    txt += "<tr>"
-                    for (var header in myObj['col0']) {
-                        txt += "<th " + "class='cell'>" + header + "<th>"
-                    }
-                    txt += "<tr>"
-                    for (var x in myObj) {
-                        var para = "<td " + "class='cell'>"
-                        var inhalt = myObj[x]
-
-                        n = 0
-                        for (var xx in inhalt) {
-                            if (n == 0) {
-                                txt = txt + '<tr>' + para + inhalt[xx] + para
-                            } else {
-                                if (n != inhalt.length - 1) {
-                                    txt += para + inhalt[xx] + para
-                                } else {
-                                    txt += para + inhalt[xx] + para + '<tr>'
-                                }
-                            }
-                            n++
+                        txt += "<table " + "class='table'>"
+                        txt += "<tr>"
+                        for (var header in myObj['col0']) {
+                            txt += "<th " + "class='cell'>" + header + "<th>"
                         }
+                        txt += "<tr>"
+                        for (var x in myObj) {
+                            var para = "<td " + "class='cell'>"
+                            var inhalt = myObj[x]
+
+                            n = 0
+                            for (var xx in inhalt) {
+                                if (n == 0) {
+                                    txt = txt + '<tr>' + para + inhalt[xx] + para
+                                } else {
+                                    if (n != inhalt.length - 1) {
+                                        txt += para + inhalt[xx] + para
+                                    } else {
+                                        txt += para + inhalt[xx] + para + '<tr>'
+                                    }
+                                }
+                                n++
+                            }
+                        }
+                        txt += "</table>"
+                        document.getElementById("workplace").innerHTML = txt;
+                    } else {
+                        alert('No label selected')
                     }
-                    txt += "</table>"
-                    document.getElementById("workplace").innerHTML = txt;
-                    console.log(txt)
+
                 }
             }
 

@@ -12,4 +12,6 @@ router.post('/returnSearch', router_handler.returnSearch)
 
 router.post('/searchLabel', router_handler.searchLabel)
 
+router.post('/imageOriShow', router_handler.imageOriSchow)
+
 module.exports = router;
