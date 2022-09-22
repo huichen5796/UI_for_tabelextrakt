@@ -1496,7 +1496,7 @@ def SaveTable(nummer, table, img_path, error_info, model, list_output):
                      thickness=1, lineType=cv2.LINE_AA)  # draw the white line on black image
             cv2.line(image_add, (col+w//2, 0), (col+w//2, 1100), color=(0, 255, 0),
                      thickness=1, lineType=cv2.LINE_AA)  # draw the white line on black image
-        cv2.imwrite('.\\Development\\imageSave\\{}'.format(
+        cv2.imwrite('assets\\imageShow\\{}'.format(
             'table_' + str(nummer+1) + '_of_' + str(os.path.basename(img_path))), image_add)
 
         center_list, label_list, tablesize = GetLabel(

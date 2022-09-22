@@ -169,7 +169,6 @@
     <div style="height: 20px; width: 50%;"></div>
     <div class="title">Automatische Erkennung und Konvertierung <br>von Tabellen in Bilddokumenten</div>
     <div class="label"><img src="label.jpg" width="50px" height="50px" /></div>
-
     <div class="menu-box">
 
         <form id="uploader">
@@ -231,47 +230,60 @@
             }
 
             imageSearch.onchange = function () {
-                const xhr = new XMLHttpRequest()
+
                 const imageValue = imageSearch.value
-                const params = 'image=' + imageValue
-                xhr.open('post', '/imageOriShow')
-                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
-                xhr.send(params)
-                xhr.onload = function () {
-                    if (xhr.status == 200) {
+                if (imageValue === '--none--') { }
+                else {
+                    const xhr = new XMLHttpRequest()
+                    const params = 'image=' + imageValue
+                    xhr.open('post', '/imageOriShow')
+                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+                    xhr.send(params)
+                    xhr.onload = function () {
+                        if (xhr.status == 200) {
 
-                        var result = JSON.parse(xhr.responseText)
-                        var img = document.createElement('img')
-                        img.src = result.path
-                        img.onload = function () {
-                            var wp_left = document.getElementById('wp-left')
-                            wp_left.appendChild(img)
+                            var result = JSON.parse(xhr.responseText)
+                            var img = document.createElement('img')
+                            img.src = result.path
+                            img.onload = function () {
+                                var wp_left = document.getElementById('wp-left')
+                                wp_left.appendChild(img)
+                            }
                         }
-                    }
-                }
-                btnRun.onclick = function () {
-                    var formData = new FormData(uploader)
-
-                    if (formData.get('file').name != "" && formData.get('model') != null) {
-                        const xhr = new XMLHttpRequest()
-                        xhr.open('post', '/run')
-                        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
-                        xhr.send(formData)
-                        xhr.onload = function () {
-                            console.log(JSON.parse(xhr.responseText))
-                        }
-                    }
-                    else if (formData.get('file').name == "" && formData.get('model') != null) {
-                        alert('No file uploaded')
-                    }
-                    else if (formData.get('file').name != "" && formData.get('model') == null) {
-                        alert('No model selected')
-                    }
-                    else if (formData.get('file').name == "" && formData.get('model') == null) {
-                        alert('Please upload files and select model to use')
                     }
                 }
             }
+            btnRun.onclick = function () {
+                var formData = new FormData(uploader)
+
+                if (formData.get('file').name != "" && formData.get('model') != null) {
+                    const xhr = new XMLHttpRequest()
+                    const parameter = 'file=' + formData.get('file').name + '&model=' + formData.get('model')
+                    xhr.open('post', '/run')
+                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+                    xhr.send(parameter)
+                    xhr.onload = function () {
+                        var result = JSON.parse(xhr.responseText)
+                        var img = document.createElement('img')
+                        console.log(result)
+                            img.src = result.path
+                            img.onload = function () {
+                                var wp_right = document.getElementById('wp-right')
+                                wp_right.appendChild(img)
+                            } 
+                    }
+                }
+                else if (formData.get('file').name == "" && formData.get('model') != null) {
+                    alert('No file uploaded')
+                }
+                else if (formData.get('file').name != "" && formData.get('model') == null) {
+                    alert('No model selected')
+                }
+                else if (formData.get('file').name == "" && formData.get('model') == null) {
+                    alert('Please upload files and select model to use')
+                }
+            }
+
         </script>
 
         <div class="menu-item">--search in Elasticsearch--</div>

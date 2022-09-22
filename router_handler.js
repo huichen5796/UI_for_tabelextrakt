@@ -21,8 +21,8 @@ exports.upload = (req, res) => {
         const py = spawn('python', ['main.py', imagePathStr])
 
         /* Output the print content in the py file */
-        py.stdout.on('data', function (resultSearch) {
-            const data = resultSearch.toString()
+        py.stdout.on('data', function (result) {
+            const data = result.toString()
             console.log(data)
 
         })
@@ -31,42 +31,24 @@ exports.upload = (req, res) => {
 }
 
 exports.runPy = (req, res) => {
-    const form = new formidable.IncomingForm()
-    form.parse(req, (err, fields, files) => {
-        res.send(fields)
-
-    })
-
     const body = req.body
-    if (body.model && body.file) {
-
-        const run = {
-            'todo': 'run',
-            'file': body.file,
-            'model': body.model
-        }
-
-        const runStr = JSON.stringify(run)
-        const py = spawn('python', ['main.py', runStr])
-
-        /* Output the print content in the py file */
-        py.stdout.on('data', function (resultSearch) {
-            const data = JSON.parse(resultSearch.toString())
-            console.log(data)
-            res.send(data)
-        })
+    const run = {
+        todo: 'run',
+        file: body.file,
+        model: body.model,
     }
-}
+    const runStr = JSON.stringify(run)
+    const py = spawn('python', ['main.py', runStr])
 
-
-exports.returnTable = (req, res) => {
-    console.log(res.body)
+    /* Output the print content in the py file */
+    py.stdout.on('data', function (result) {
+        const data = JSON.parse(result.toString())
+        res.send(data)
+    })
 }
 
 exports.returnSearch = (req, res) => {
     const body = req.body
-
-
     const search = {
         'todo': 'search',
         'idx': body.idx,
@@ -105,18 +87,16 @@ exports.searchLabel = (req, res) => {
 
 exports.imageOriSchow = (req, res) => {
     const body = req.body
-
-
-    const search = { 
+    const search = {
         'todo': 'showOri',
         'image': body.image,
     }
-    const searchJSON = JSON.stringify(search)
-    const py = spawn('python', ['main.py', searchJSON])
+    const searchStr = JSON.stringify(search)
+    const py = spawn('python', ['main.py', searchStr])
 
     /* Output the print content in the py file */
-    py.stdout.on('data', function (resultSearch) {
-        const data = JSON.parse(resultSearch.toString())
+    py.stdout.on('data', function (result) {
+        const data = JSON.parse(result.toString())
         res.send(data)
     })
 
