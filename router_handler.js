@@ -14,19 +14,16 @@ exports.upload = (req, res) => {
             fileBinarName: files.attrName.filepath.split("uploads\\")[1],
             fileName: files.attrName.originalFilename
         }
-
+        console.log(imagePath)
 
         const imagePathStr = JSON.stringify(imagePath)
 
         const py = spawn('python', ['main.py', imagePathStr])
 
         /* Output the print content in the py file */
-        py.stdout.on('data', function (result) {
-            const data = result.toString()
-            console.log(data)
-
-        })
+        py.stdout.on('data', function (result) { })
         res.send(imagePath)
+        console.log('success ' + "todo: 'savePath'")
     })
 }
 
@@ -37,6 +34,7 @@ exports.runPy = (req, res) => {
         file: body.file,
         model: body.model,
     }
+    console.log(run)
     const runStr = JSON.stringify(run)
     const py = spawn('python', ['main.py', runStr])
 
@@ -44,6 +42,7 @@ exports.runPy = (req, res) => {
     py.stdout.on('data', function (result) {
         const data = JSON.parse(result.toString())
         res.send(data)
+        console.log('success ' + "todo: 'run'")
     })
 }
 
@@ -61,8 +60,9 @@ exports.returnSearch = (req, res) => {
     /* Output the print content in the py file */
     py.stdout.on('data', function (resultSearch) {
         const data = JSON.parse(resultSearch.toString())
-        console.log(data)
+        // console.log(data)
         res.send(data)
+        console.log('success ' + "todo: 'search'")
     })
 }
 
@@ -80,8 +80,9 @@ exports.searchLabel = (req, res) => {
     /* Output the print content in the py file */
     py.stdout.on('data', function (resultSearch) {
         const data = resultSearch.toString()
-        console.log('Add labels ' + data)
+        // console.log('Add labels ' + data)
         res.send(data)
+        console.log('success ' + "todo: 'searchLabel'")
     })
 }
 
@@ -91,6 +92,7 @@ exports.imageOriSchow = (req, res) => {
         'todo': 'showOri',
         'image': body.image,
     }
+    console.log(search)
     const searchStr = JSON.stringify(search)
     const py = spawn('python', ['main.py', searchStr])
 
@@ -98,6 +100,6 @@ exports.imageOriSchow = (req, res) => {
     py.stdout.on('data', function (result) {
         const data = JSON.parse(result.toString())
         res.send(data)
+        console.log('success ' + "todo: 'schowOri'")
     })
-
 }

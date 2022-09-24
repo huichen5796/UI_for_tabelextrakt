@@ -483,11 +483,11 @@ def PositionTable(img_1024, img_path, model_used):
     device = 'cpu'
 
     if model_used == 'densenet':
-        path = 'Development\\models\\densetable_210.pkl'
+        path = 'models\\densetable_210.pkl'
         model = torch.load(path, map_location=torch.device(device))
 
     elif model_used == 'unet':
-        path = "Development\\models\\unet100_180spe.pkl"
+        path = "models\\unet100_180spe.pkl"
 
         model = torch.load(path, map_location=torch.device(device))
 
@@ -749,11 +749,11 @@ def GetColumn(table, model_used):
     device = 'cpu'
 
     if model_used == 'densenet':
-        path = 'Development\\models\\densecol_140.pkl'
+        path = 'models\\densecol_140.pkl'
         model = torch.load(path, map_location=torch.device(device))
 
     elif model_used == 'unet':
-        path = "Development\\models\\unetcol_300.pkl"
+        path = "models\\unetcol_300.pkl"
         model = torch.load(path, map_location=torch.device(device))
 
     shape_list = list(table.shape)
@@ -1611,7 +1611,7 @@ def Main(img_path, model, error_info, list_output):
 
 
 if __name__ == '__main__':
-    img_path = 'Development\\imageTest\\test12.png'
+    img_path = 'imageTest\\test12.png'
 
     es.indices.delete(index='table', ignore=[400, 404])  # deletes whole index
 
