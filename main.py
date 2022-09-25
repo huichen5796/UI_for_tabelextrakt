@@ -14,6 +14,7 @@ from elasticsearch import Elasticsearch
 from elasticsearch import helpers
 es = Elasticsearch()
 
+
 class DenseNet(nn.Module):
     def __init__(self, pretrained=True, requires_grad=True):
         super(DenseNet, self).__init__()
@@ -111,7 +112,7 @@ class TableNet(nn.Module):
 def receivePara():
     msg = sys.argv[1]
     msg = eval(msg)
-    #msg = {'todo': 'cleanAll'}
+    #msg = {'todo': 'continue'}
     if msg['todo'] == 'run':
         try:
             f = open('assets\\uploads\\originalName.txt', 'r')
@@ -132,7 +133,7 @@ def receivePara():
 
             file_name = info_list[-1]['fileName']
             model = msg['model']
-        #try:
+        # try:
             shape_list = list(image.shape)
             if len(shape_list) == 3:
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -150,21 +151,11 @@ def receivePara():
                 SaveTable(nummer, table, img_path, [],
                           model, [])  # densecol besser
 
-            '''mass=[]
-            number = len(table_zone)
-            for i in range(1, number+1):
-                mass.append('"the %sst table of %s":"imageShow\\table_%s_of_%s"' %(i, msg['file'], i, msg['file']))'''
-
-            if len(table_boundRect) != 0:
-                #res = "{'massage':'getTable'," + ','.join(mass) + '}'
-                res = {
-                    'massage': 'getTable'
+            res = {
+                'massage': 'success',
+                'tableNumber': str(len(table_zone))
                 }
-            else:
-                res = {
-                    'massage': 'noTable'
-                }
-
+            
             relation = {
                 'file': file_name,
                 'tableNumber': str(len(table_zone))
@@ -192,12 +183,18 @@ def receivePara():
                 del result['_source']['fileName']
                 table['col%s' % i] = result['_source']
 
-            print(json.dumps(table))
+            print(json.dumps({
+                'massage':'success',
+                'datas':table,
+                'label':msg['label']
+            }))
         except:
-            print(json.dumps({'er':'error'}))
+            print(json.dumps({
+                'massage': 'error',
+            }))
 
     if msg['todo'] == 'searchLabel':
-       
+
         try:
             uniqueId_list = []
             res = Search('table', 'all')
@@ -215,9 +212,9 @@ def receivePara():
             with open('assets/uploads/originalName.txt', 'a+') as f:
                 f.write(str(msg).replace('\\', '/').replace('//', '/')+'\n')
             print(json.dumps({'massage': 'success',
-                'fileName': '["'+msg['fileName']+'"]'}))
+                              'fileName': '["'+msg['fileName']+'"]'}))
         except:
-            print(json.dumps({'massage': 'success',}))
+            print(json.dumps({'massage': 'error', }))
 
     if msg['todo'] == 'seeResult':
         try:
@@ -238,7 +235,7 @@ def receivePara():
             number = int(info_list[-1]['tableNumber'])
             for i in range(1, number+1):
                 mass.append('"the_%sst_table_of_%s":"imageShow/table_%s_of_%s"' %
-                            (i, msg['image'].split('.')[0], i, msg['image'].split('.')[0]))
+                            (i, msg['image'], i, msg['image']))
 
             print(json.dumps('{"massage":"success","fileName":"'+str(
                 msg['image'])+'","path":"'+path_list[-1]['path']+'",'+",".join(mass)+'}'))
@@ -258,19 +255,40 @@ def receivePara():
             f = open('assets/imageShow/relation.txt', 'w')
             f.close()
 
-            es.indices.delete(index='table', ignore=[400, 404])  # deletes whole index
+            # deletes whole index
+            es.indices.delete(index='table', ignore=[400, 404])
 
-            print(json.dumps({'massage':'success'}))
+            print(json.dumps({'massage': 'success'}))
         except:
-            print(json.dumps({'massage':'error'}))
+            print(json.dumps({'massage': 'error'}))
 
     if msg['todo'] == 'cleanEla':
         try:
-            es.indices.delete(index='table', ignore=[400, 404])  # deletes whole index
+            # deletes whole index
+            es.indices.delete(index='table', ignore=[400, 404])
 
-            print(json.dumps({'massage':'success'}))
+            print(json.dumps({'massage': 'success'}))
         except:
-            print(json.dumps({'massage':'error'}))
+            print(json.dumps({'massage': 'error'}))
+
+    if msg['todo'] == 'continue':
+        try:
+            file_list = []
+            with open('assets/uploads/originalName.txt', 'r') as f:
+                for line in f:
+                    file_list.append(eval(line)['fileName'])
+                file_list = list(set(file_list))
+                if len(file_list) != 0:
+                    print(json.dumps({
+                        'massage': 'success',
+                        'fileName': file_list
+                    }))
+                else:
+                    print(json.dumps({
+                        'massage': 'error',
+                    }))
+        except:
+            print(json.dumps({'massage': 'error', }))
 
 
 receivePara()

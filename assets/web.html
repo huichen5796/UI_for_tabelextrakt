@@ -140,6 +140,7 @@
             border-width: thin;
             border-color: black;
             text-align: center;
+
         }
 
         .wp-right {
@@ -205,13 +206,13 @@
 
         .imageHeight {
             height: 100%;
-            margin: auto;
+            vertical-align: middle;
 
         }
 
         .imageWidth {
             width: 100%;
-            margin: auto;
+            vertical-align: middle;
 
         }
 
@@ -238,6 +239,7 @@
             text-align: center;
 
         }
+
     </style>
 
 </head>
@@ -298,10 +300,8 @@
                 xhr.send(f)
 
                 xhr.onload = function () {
-                    if (xhr.status == 200) {
-
-                        var result = JSON.parse(xhr.responseText)
-
+                    var result = JSON.parse(xhr.responseText)
+                    if (result.massage === 'success') {
                         var label_list = eval(result.fileName)
 
                         var label_oldoptions = document.getElementById('image').options
@@ -320,6 +320,8 @@
                                 var object = board.appendChild(e);
                             }
                         }
+                    } else {
+                        alert('Backend error')
                     }
                 }
             }
@@ -406,7 +408,7 @@
                                 wp_left_hind.appendChild(img)
                             }
                         } else {
-                            alert('error!! Please make sure the program has finished running')
+                            alert('No data found!! Please make sure the program has finished running')
                         }
 
                     }
@@ -423,15 +425,12 @@
                     xhr.send(parameter)
                     xhr.onload = function () {
                         var result = JSON.parse(xhr.responseText)
-                        if (result.massage === 'getTable') {
-                            var tableSelect = document.getElementById('tableSelect')
-
-                            var e = document.createElement("option");
-                            e.value = result.fileName
-                            e.text = result.fileName
-                            var object = tableSelect.appendChild(e);
+                        if (result.massage === 'success') {
+                            alert('Run success, please select a file to see result')
+                        } else {
+                            alert('Run failed, please see README.md to find countermeasures')
                         }
-                        alert('Run success, please select a file to see result')
+
                     }
                 }
                 else if (formData.get('file').name == "" && formData.get('model') != null) {
@@ -552,10 +551,11 @@
                 xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
                 xhr.send(params)
                 xhr.onload = function () {
-                    myObj = JSON.parse(xhr.responseText);
-                    if (myObj.er === 'error') {
+                    var result = JSON.parse(xhr.responseText);
+                    if (result.massage === 'error') {
                         alert('Failed to query data in Elasticsearch')
                     } else {
+                        var myObj = result.datas
                         var txt = ''
                         txt += "<table " + "class='table'>"
                         txt += "<tr>"
@@ -664,13 +664,18 @@
         </div>
         <input type="button" id="hiddenB" class="hidden-button">
         <div id='wp-left' class="wp-left" style="display:block">
-
+            
         </div>
         <div id="wp-left-hind" class="wp-left" style="display:none">
-
+            
         </div>
-        <div id='wp-right' class="wp-right">
 
+        <div id="wp-left-hind2" class="wp-left" style="display:none">
+            
+        </div>
+
+        <div id='wp-right' class="wp-right">
+            
         </div>
     </div>
     <script type="text/javascript">
@@ -699,26 +704,39 @@
     <script type="text/javascript">
         var hiddenB = document.getElementById('hiddenB');
         var imageT = document.getElementById('image')
+        var tableSel = document.getElementById('tableSelect')
         hiddenB.onclick = function () {
             if (imageT.value != '--none--') {
-
                 var oriImage = document.getElementById('wp-left')
                 var tableZone = document.getElementById('wp-left-hind')
-                //console.log([oriImage.style.zIndex, tableZone.style.zIndex])
+                var oneTable = document.getElementById('wp-left-hind2')
 
-                if (oriImage.style.display == 'none') {
-                    oriImage.style.display = 'block'
-                    tableZone.style.display = 'none'
+                if (tableSel.value == '--none--') {
+                    if (oriImage.style.display == 'none') {
+                        oriImage.style.display = 'block'
+                        tableZone.style.display = 'none'
+                    } else {
+                        oriImage.style.display = 'none'
+                        tableZone.style.display = 'block'
+                    }
                 } else {
-                    oriImage.style.display = 'none'
-                    tableZone.style.display = 'block'
+                    if (oneTable.style.display == 'block') {
+                        oriImage.style.display = 'block'
+                        tableZone.style.display = 'none'
+                        oneTable.style.display = 'none'
+                    } else if (oriImage.style.display == 'block') {
+                        oriImage.style.display = 'none'
+                        tableZone.style.display = 'block'
+                        oneTable.style.display = 'none'
+                    } else if (tableZone.style.display == 'block') {
+                        oriImage.style.display = 'none'
+                        tableZone.style.display = 'none'
+                        oneTable.style.display = 'block'
+                    }
                 }
-                //console.log([oriImage.style.zIndex, tableZone.style.zIndex])
-
             } else {
                 alert('Please select the object to be visualized in the left menu first')
             }
-
         }
     </script>
 
@@ -734,10 +752,11 @@
                 xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
                 xhr.send(params)
                 xhr.onload = function () {
-                    myObj = JSON.parse(xhr.responseText);
-                    if (myObj.er === 'error') {
+                    var result = JSON.parse(xhr.responseText);
+                    if (result.massage === 'error') {
                         alert('Failed to query data in Elasticsearch')
                     } else {
+                        var myObj = result.datas
                         var txt = ''
                         txt += "<table " + "class='table'>"
                         txt += "<tr>"
@@ -765,6 +784,34 @@
                         }
                         txt += "</table>"
                         document.getElementById("wp-right").innerHTML = txt;
+
+                        //creatimage src=result.label
+                        var img = document.createElement('img')
+                        var i = new Image()
+                        var naturalWidth, naturalHeight
+                        img.src = 'imageShow/' + result.label
+                        // console.log(img.src)
+                        img.onload = function () {
+                            naturalWidth = this.width
+                            naturalHeight = this.height
+                            if (naturalHeight >= naturalWidth) {
+                                img.className = 'imageHeight'
+                            } else {
+                                img.className = 'imageWidth'
+                            }
+                            var wp_left_hind2 = document.getElementById('wp-left-hind2')
+                            var wp_left_hind = document.getElementById('wp-left-hind')
+                            var wp_left = document.getElementById('wp-left')
+                            var child = wp_left_hind2.lastElementChild
+                            while (child) {
+                                wp_left_hind2.removeChild(child)
+                                child = wp_left_hind2.lastElementChild
+                            }
+                            wp_left_hind2.appendChild(img)
+                            wp_left.style.display = 'none'
+                            wp_left_hind.style.display = 'none'
+                            wp_left_hind2.style.display = 'block'
+                        }
                     }
                 }
             }
@@ -777,9 +824,38 @@
     <script type="text/javascript">
         const btnContinue = document.getElementById('continue')
         btnContinue.onclick = function () {
-            var mg = confirm('to load the last unfinished task or not')
+            var mg = confirm('The last unfinished task will be load')
             if (mg) {
-                //断点加载之前所有需要的查询栏！
+                const xhr = new XMLHttpRequest()
+                const params = 'todo=continue'
+                xhr.open('post', '/continue')
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+                xhr.send(params)
+                xhr.onload = function () {
+                    var result = JSON.parse(xhr.responseText)
+                    if (result.massage === 'success') {
+                        var label_list = eval(result.fileName)
+                        var label_oldoptions = document.getElementById('image').options
+                        var label_old = []
+                        for (let i = 0; i < label_oldoptions.length; i++) {
+                            label_old.push(label_oldoptions[i].value)
+                        }
+                        // console.log(label_old)
+                        for (let i = 0; i < label_list.length; i++) {
+                            if (label_old.indexOf(label_list[i]) === -1) {
+                                var label_new = label_list[i]
+                                var board = document.getElementById("image");
+                                var e = document.createElement("option");
+                                e.value = label_new
+                                e.text = label_new
+                                var object = board.appendChild(e);
+                            }
+                        }
+                        alert('Breakpoint loading success')
+                    } else {
+                        alert('Breakpoint loading failed')
+                    }
+                }
             }
             else {
                 alert('Abandon loading, please remember to clear the data so as not to affect subsequent tasks.')

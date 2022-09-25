@@ -52,9 +52,16 @@ exports.runPy = (req, res) => {
     /* Output the print content in the py file */
     py.stdout.on('data', function (result) {
         const data = JSON.parse(result.toString())
-        // console.log(data)
-        res.send(data)
-        console.log('success ' + "todo: 'run'")
+        if (data.massage === 'success') {
+            // console.log(data)
+            res.send(data)
+            console.log('success ' + "todo: 'run'")
+        }
+        else{
+            res.send(data)
+            console.log('error ' + "todo: 'run'")
+        }
+
     })
 }
 
@@ -73,7 +80,7 @@ exports.returnSearch = (req, res) => {
     py.stdout.on('data', function (resultSearch) {
         const data = JSON.parse(resultSearch.toString())
         // console.log(data)
-        if (data.er === 'error') {
+        if (data.massage === 'error') {
             res.send(data)
             console.log('error ' + "todo: 'search'")
         } else {
@@ -144,6 +151,30 @@ exports.cleanAll = (req, res) => {
     console.log(clean)
     const cleanStr = JSON.stringify(clean)
     const py = spawn('python', ['main.py', cleanStr])
+
+    /* Output the print content in the py file */
+    py.stdout.on('data', function (result) {
+        const data = JSON.parse(result.toString())
+        // console.log(data)
+        if (data.massage == 'success') {
+            res.send(data)
+            console.log('success ' + "todo: " + body.todo)
+        } else {
+            res.send(data)
+            console.log('error ' + "todo: " + body.todo)
+        }
+
+    })
+}
+
+exports.continue = (req, res) => {
+    const body = req.body
+    const cont = {
+        'todo': body.todo,
+    }
+    console.log(cont)
+    const contStr = JSON.stringify(cont)
+    const py = spawn('python', ['main.py', contStr])
 
     /* Output the print content in the py file */
     py.stdout.on('data', function (result) {

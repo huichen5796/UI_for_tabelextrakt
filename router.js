@@ -14,4 +14,6 @@ router.post('/seeResult', router_handler.seeResult)
 
 router.post('/clean', router_handler.cleanAll)
 
+router.post('/continue', router_handler.continue)
+
 module.exports = router;
