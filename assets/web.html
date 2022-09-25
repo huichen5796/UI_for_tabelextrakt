@@ -76,6 +76,32 @@
             color: white;
         }
 
+        .menu-button-warn {
+            width: 100%;
+            height: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0px;
+            font-size: 16px;
+            font-family: Arial;
+            font-weight: bold;
+            border-radius: 25px;
+            margin-top: 10px;
+            -webkit-transition-duration: 0.4s;
+            transition-duration: 0.4s;
+            text-align: center;
+            background-color: white;
+            color: red;
+            border: 2px solid red;
+            border-radius: 5px;
+        }
+
+        .menu-button-warn:hover {
+            background-color: red;
+            color: white;
+        }
+
         .menu-item {
             font-family: Arial;
             font-weight: bold;
@@ -130,6 +156,19 @@
             text-align: center;
         }
 
+        .hidden-button {
+            position: absolute;
+            top: 10%;
+            margin-bottom: 5%;
+            margin-left: 2.5%;
+            height: 80%;
+            width: 45%;
+            z-index: 999;
+            background-color: transparent;
+            border: none;
+
+        }
+
         .table {
             margin: 40 auto;
             border: 2px solid black;
@@ -175,6 +214,30 @@
             margin: auto;
 
         }
+
+        .table-select {
+            position: absolute;
+            top: 3%;
+            left: 2.5%;
+            font-family: Arial;
+            font-size: 15px;
+            font-weight: thin;
+        }
+
+        .tableZone {
+            position: absolute;
+            top: 10%;
+            margin-bottom: 5%;
+            right: 2.5%;
+            left: 2.5%;
+            height: 80%;
+            width: 95%;
+            border-top: solid;
+            border-width: thin;
+            border-color: black;
+            text-align: center;
+
+        }
     </style>
 
 </head>
@@ -183,7 +246,7 @@
     <div style="height: 20px; width: 50%;"></div>
     <div class="title">Automatische Erkennung und Konvertierung <br>von Tabellen in Bilddokumenten</div>
     <div class="label"><img src="label.jpg" width="50px" height="50px" /></div>
-    <div class="menu-box">
+    <div id='menu-box' class="menu-box" style="display: block;">
 
         <form id="uploader">
             <div class="menu-title">MENU</div>
@@ -194,12 +257,6 @@
             </div>
             <div id='bar-number' class="bar-number">0%</div>
 
-            <div class="menu-opt">
-                file list:
-                <select id="image" name="'image">
-                    <option value="--none--" selected>--none--</option>
-                </select><br>
-            </div>
             <div class="menu-item">--model to use--</div>
             <div class="menu-opt">
                 <input type="checkbox" name='model' id="model" value="densenet">densenet
@@ -207,11 +264,22 @@
                 <input type="button" value="RUN" id="btnRun" class="menu-button">
             </div>
         </form>
+        <div>
+            <div class="menu-item">--results visualization--</div>
+            <div class="menu-opt">
+                select a file:
+                <select id="image" name="'image">
+                    <option value="--none--" selected>--none--</option>
+                </select><br>
+                <input type="button" value="SHOW" id="btnShow" class="menu-button">
+            </div>
+        </div>
         <script type="text/javascript">
             const btnRun = document.getElementById('btnRun')
             const uploader = document.getElementById('uploader')
             const fileUp = document.getElementById('file')
             const imageSearch = document.getElementById('image')
+            const btnShow = document.getElementById('btnShow')
 
             fileUp.onchange = function () {
                 const xhr = new XMLHttpRequest()
@@ -233,43 +301,58 @@
                     if (xhr.status == 200) {
 
                         var result = JSON.parse(xhr.responseText)
-                        var board = document.getElementById("image");
-                        var e = document.createElement("option");
-                        e.value = result.fileName
-                        e.text = result.fileName
-                        var object = board.appendChild(e);
 
+                        var label_list = eval(result.fileName)
+
+                        var label_oldoptions = document.getElementById('image').options
+                        var label_old = []
+                        for (let i = 0; i < label_oldoptions.length; i++) {
+                            label_old.push(label_oldoptions[i].value)
+                        }
+                        // console.log(label_old)
+                        for (let i = 0; i < label_list.length; i++) {
+                            if (label_old.indexOf(label_list[i]) === -1) {
+                                var label_new = label_list[i]
+                                var board = document.getElementById("image");
+                                var e = document.createElement("option");
+                                e.value = label_new
+                                e.text = label_new
+                                var object = board.appendChild(e);
+                            }
+                        }
                     }
                 }
             }
 
-            imageSearch.onchange = function () {
+            btnShow.onclick = function () {
 
                 const imageValue = imageSearch.value
-                if (imageValue === '--none--') { }
+                if (imageValue === '--none--') {
+                    alert('Please select a file to see the result')
+                }
                 else {
                     const xhr = new XMLHttpRequest()
                     const params = 'image=' + imageValue
-                    xhr.open('post', '/imageOriShow')
+                    xhr.open('post', '/seeResult')
                     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
                     xhr.send(params)
+
                     xhr.onload = function () {
-                        if (xhr.status == 200) {
-
-                            var result = JSON.parse(xhr.responseText)
-
-                            var img = document.createElement('img')
+                        var result = JSON.parse(xhr.responseText)
+                        var resultKeys = Object.keys(result)
+                        if (result.massage === 'success') {
+                            var imgo = document.createElement('img')
                             var i = new Image()
                             var naturalWidth, naturalHeight
-                            img.src = result.path
-
-                            img.onload = function () {
+                            imgo.src = result.path
+                            // console.log(imgo.src)
+                            imgo.onload = function () {
                                 naturalWidth = this.width
                                 naturalHeight = this.height
-                                if (naturalHeight > naturalWidth) {
-                                    img.className = 'imageHeight'
+                                if (naturalHeight >= naturalWidth) {
+                                    imgo.className = 'imageHeight'
                                 } else {
-                                    img.className = 'imageWidth'
+                                    imgo.className = 'imageWidth'
                                 }
                                 var wp_left = document.getElementById('wp-left')
                                 var child = wp_left.lastElementChild
@@ -277,9 +360,55 @@
                                     wp_left.removeChild(child)
                                     child = wp_left.lastElementChild
                                 }
-                                wp_left.appendChild(img)
+                                wp_left.appendChild(imgo)
                             }
+                            var tableSelect = document.getElementById('tableSelect')
+                            var child = tableSelect.lastElementChild
+                            while (child) {
+                                tableSelect.removeChild(child)
+                                child = tableSelect.lastElementChild
+                            }
+                            e_none = document.createElement('option')
+                            e_none.value = "--none--"
+                            e_none.text = '--none--'
+                            tableSelect.appendChild(e_none)
+
+                            for (i = 3; i < resultKeys.length; i++) {
+                                var e = document.createElement("option");
+                                var n = resultKeys[i]
+                                // console.log(n)
+                                // console.log((result[n]))
+                                // console.log((result[n]).split("/"))
+                                e.value = (result[n]).split('imageShow/')[1]
+                                e.text = (result[n]).split('imageShow/')[1]
+                                tableSelect.appendChild(e)
+                            }
+
+                            var img = document.createElement('img')
+                            var i = new Image()
+                            var naturalWidth, naturalHeight
+                            img.src = 'imageShow/table_of_' + result.fileName
+                            // console.log(img.src)
+                            img.onload = function () {
+                                naturalWidth = this.width
+                                naturalHeight = this.height
+                                if (naturalHeight >= naturalWidth) {
+                                    img.className = 'imageHeight'
+                                } else {
+                                    img.className = 'imageWidth'
+                                }
+                                var wp_left_hind = document.getElementById('wp-left-hind')
+                                var child = wp_left_hind.lastElementChild
+                                while (child) {
+                                    wp_left_hind.removeChild(child)
+                                    child = wp_left_hind.lastElementChild
+                                }
+                                wp_left_hind.appendChild(img)
+                            }
+                        } else {
+                            alert('error!! Please make sure the program has finished running')
                         }
+
                     }
                 }
             }
@@ -294,7 +423,15 @@
                     xhr.send(parameter)
                     xhr.onload = function () {
                         var result = JSON.parse(xhr.responseText)
-                        alert('End of operation, success')
+                        if (result.massage === 'getTable') {
+                            var tableSelect = document.getElementById('tableSelect')
+
+                            var e = document.createElement("option");
+                            e.value = result.fileName
+                            e.text = result.fileName
+                            var object = tableSelect.appendChild(e);
+                        }
+                        alert('Run success, please select a file to see result')
                     }
                 }
                 else if (formData.get('file').name == "" && formData.get('model') != null) {
@@ -310,38 +447,116 @@
 
         </script>
 
-        <div class="menu-item">--search in Elasticsearch--</div>
+        <div class="menu-item">--other functions--</div>
+        <input type="button" id='turn' value="ELASTICSEARCH" class="menu-button" style="width: 250px;">
+        <div class="menu-item">Please choose carefully:</div>
+        <input type="button" value="Clear all data in the backend" id="cleanAll" class="menu-button-warn">
+        <input type="button" value="Continue the interrupted work" id="continue" class="menu-button-warn">
+
+    </div>
+    <script type="text/javascript">
+        const btnCleanAll = document.getElementById('cleanAll')
+        btnCleanAll.onclick = function () {
+            var ms = confirm('This will clear all data on the backend, do you choose to continue?')
+            if (ms) {
+                const xhr = new XMLHttpRequest()
+                const params = 'todo=cleanAll'
+                xhr.open('post', '/clean')
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+                xhr.send(params)
+
+                xhr.onload = function () {
+                    var result = JSON.parse(xhr.responseText)
+                    if (result.massage === 'success') {
+                        alert('Backend has been initialized')
+                    } else {
+                        alert('Data clear failed')
+                    }
+                }
+            }
+            else {
+                alert('Data keeping')
+            }
+        }
+
+    </script>
+
+
+    <div id='menu-box-hind' class="menu-box" style="display: none;">
+        <div class="menu-title">MENU</div>
+        <input type="button" id='return' value="RETURN TO VISUALIZATION" class="menu-button" style="width: 250px;">
+        <div class="menu-item">--load database--</div>
         <div class="menu-opt">
-            search index:
+            select a index:
             <select id="idx">
                 <option value="table" selected>table</option>
-            </select><br>
-            search label:
+            </select>
+        </div>
+        <input type="button" value="LOAD" id="btnRenew" class="menu-button">
+        <div class="menu-item">--select uniqueID--</div>
+        <div class="menu-opt">
+            select a table:
             <select id="label">
                 <option value="--none--" selected>--none--</option>
             </select>
         </div>
-
-        <input type="button" value="SEARCH" id="btnSearch" class="menu-button">
-
-        <script type="text/javascript">
-            const btnSearch = document.getElementById('btnSearch')
-            const idx = document.getElementById('idx')
-            const label = document.getElementById('label')
-
-            btnSearch.onclick = function () {
+        <input type="button" value="SHOW" id="btnShowTable" class="menu-button">
+        <div class="menu-item">--save as Excel--</div>
+        <div class="menu-opt">
+            select a table:
+            <select id="selectExcel">
+                <option value="all" selected>all</option>
+            </select>
+        </div>
+        <input type="button" value="SAVE AS EXCEL" id="saveExcel" class="menu-button" style="width:150px">
+        <div class="menu-item">Please choose carefully:</div>
+        <input type="button" value="Clear all data in the Elasticsearch" id="cleanEla" class="menu-button-warn">
+    </div>
+    <script type="text/javascript">
+        const btnCleanEla = document.getElementById('cleanEla')
+        btnCleanEla.onclick = function () {
+            var ms = confirm('This will clear all data on the elasticsearch unter index "table", do you choose to continue?')
+            if (ms) {
                 const xhr = new XMLHttpRequest()
-                const idxValue = idx.value
-                const labelValue = label.value
+                const params = 'todo=cleanEla'
+                xhr.open('post', '/clean')
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+                xhr.send(params)
+
+                xhr.onload = function () {
+                    var result = JSON.parse(xhr.responseText)
+                    if (result.massage === 'success') {
+                        alert('data of index "table" has been cleand')
+                    } else {
+                        alert('Data clear failed')
+                    }
+                }
+            }
+            else {
+                alert('Data keeping')
+            }
+        }
+    </script>
+
+
+    <script type="text/javascript">
+        const label = document.getElementById('label')
+        const btnShowTable = document.getElementById('btnShowTable')
+        btnShowTable.onclick = function () {
+            const labelValue = label.value
+            if (labelValue != '--none--') {
+                const xhr = new XMLHttpRequest()
+                const idxValue = 'table'
                 const params = 'idx=' + idxValue + '&label=' + labelValue
                 xhr.open('post', '/returnSearch')
                 xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
                 xhr.send(params)
                 xhr.onload = function () {
-                    if (labelValue != '--none--') {
+                    myObj = JSON.parse(xhr.responseText);
+                    if (myObj.er === 'error') {
+                        alert('Failed to query data in Elasticsearch')
+                    } else {
                         var txt = ''
-                        myObj = JSON.parse(xhr.responseText);
-
                         txt += "<table " + "class='table'>"
                         txt += "<tr>"
                         for (var header in myObj['col0']) {
@@ -367,57 +582,91 @@
                             }
                         }
                         txt += "</table>"
-                        document.getElementById("workplace").innerHTML = txt;
-                    } else {
-                        alert('No label selected')
+                        document.getElementById("tableZone").innerHTML = txt;
                     }
-
                 }
             }
+        }
 
-        </script>
+    </script>
 
-        <input type="button" value="GET LABEL" id="btnRenew" class="menu-button">
-        <script type="text/javascript">
-            const btnRenew = document.getElementById('btnRenew')
-            btnRenew.onclick = function () {
-                const xhr = new XMLHttpRequest()
-                const idxValue = idx.value
-                const labelValue = 'all'
-                const params = 'idx=' + idxValue + '&label=' + labelValue
-                xhr.open('post', '/searchLabel')
-                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
-                xhr.send(params)
-                xhr.onload = function () {
-
-                    var label_list = eval(xhr.responseText)
-                    var label_oldoptions = document.getElementById('label').options
-                    var label_old = []
-                    for (let i = 0; i < label_oldoptions.length; i++) {
-                        label_old.push(label_oldoptions[i].value)
+    <script type="text/javascript">
+        const btnRenew = document.getElementById('btnRenew')
+        btnRenew.onclick = function () {
+            const xhr = new XMLHttpRequest()
+            const idxValue = 'table'
+            const labelValue = 'all'
+            const params = 'idx=' + idxValue + '&label=' + labelValue
+            xhr.open('post', '/searchLabel')
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+            xhr.send(params)
+            xhr.onload = function () {
+                var label_list = eval(xhr.responseText)
+                if (label_list[0] != 'error') {
+                    var labelSelect = document.getElementById('label')
+                    var child = labelSelect.lastElementChild
+                    while (child) {
+                        labelSelect.removeChild(child)
+                        child = labelSelect.lastElementChild
                     }
+                    e_none = document.createElement('option')
+                    e_none.value = "--none--"
+                    e_none.text = '--none--'
+                    labelSelect.appendChild(e_none)
 
                     for (let i = 0; i < label_list.length; i++) {
-                        if (label_old.indexOf(label_list[i]) === -1) {
-                            var label_new = label_list[i]
-                            var board = document.getElementById("label");
-                            var e = document.createElement("option");
-                            e.value = label_new
-                            e.text = label_new
-                            var object = board.appendChild(e);
-                        }
-                        else { }
+                        var label_new = label_list[i]
+                        var e = document.createElement("option");
+                        e.value = label_new
+                        e.text = label_new
+                        labelSelect.appendChild(e)
+                    }
+
+                    var selectExcel = document.getElementById('selectExcel')
+                    var childs = selectExcel.lastElementChild
+                    while (childs) {
+                        selectExcel.removeChild(childs)
+                        childs = selectExcel.lastElementChild
+                    }
+                    e_all = document.createElement('option')
+                    e_all.value = "all"
+                    e_all.text = 'all'
+                    selectExcel.appendChild(e_all)
+
+                    for (let i = 0; i < label_list.length; i++) {
+                        var label_new = label_list[i]
+                        var e = document.createElement("option");
+                        e.value = label_new
+                        e.text = label_new
+                        selectExcel.appendChild(e)
                     }
                 }
+                else {
+                    alert('Failed to query data in Elasticsearch')
+                }
             }
-        </script>
+        }
+    </script>
 
 
-
+    <div id="workplace-for-ela" class="work-place" style="display:none">
+        <div id='tableZone' class="tableZone"></div>
     </div>
 
-    <div id='workplace' class="work-place">
-        <div id='wp-left' class="wp-left">
+    <div id='workplace' class="work-place" style="display: block">
+
+        <div id='showArea' class="table-select">
+            Click on image to view table area<br>
+            Select the table of the image to see the details:
+            <select id="tableSelect">
+                <option value="--none--" selected>--none--</option>
+            </select>
+        </div>
+        <input type="button" id="hiddenB" class="hidden-button">
+        <div id='wp-left' class="wp-left" style="display:block">
+
+        </div>
+        <div id="wp-left-hind" class="wp-left" style="display:none">
 
         </div>
         <div id='wp-right' class="wp-right">
@@ -425,18 +674,119 @@
         </div>
     </div>
     <script type="text/javascript">
-        //todo 添加wpleft点击事件，后端搜索已经显示的相应的处理图，如果无相应处理图提醒请先运行，如果wpleft是空的不做任何处理。这个处理图应该是跟原图一样的，最好表格部分做一下突出显示
+        var btnReturn = document.getElementById('return')
+        var wp = document.getElementById('workplace')
+        var wpforEla = document.getElementById('workplace-for-ela')
+        var menu = document.getElementById('menu-box')
+        var menuHind = document.getElementById('menu-box-hind')
+        btnReturn.onclick = function () {
+
+            wp.style.display = 'block'
+            wpforEla.style.display = 'none'
+            menu.style.display = 'block'
+            menuHind.style.display = 'none'
+        }
+        var btnTurn = document.getElementById('turn')
+        btnTurn.onclick = function () {
+
+            wp.style.display = 'none'
+            wpforEla.style.display = 'block'
+            menu.style.display = 'none'
+            menuHind.style.display = 'block'
+        }
     </script>
 
-<script>
-    //menu添加选项栏：
-    //保存表格为excel功能
+    <script type="text/javascript">
+        var hiddenB = document.getElementById('hiddenB');
+        var imageT = document.getElementById('image')
+        hiddenB.onclick = function () {
+            if (imageT.value != '--none--') {
 
-    //menu添加谨慎选择选项栏：
-    //清空数据库功能
-    //清空elasticsearch功能
-</script>
+                var oriImage = document.getElementById('wp-left')
+                var tableZone = document.getElementById('wp-left-hind')
+                //console.log([oriImage.style.zIndex, tableZone.style.zIndex])
 
-</body> 
+                if (oriImage.style.display == 'none') {
+                    oriImage.style.display = 'block'
+                    tableZone.style.display = 'none'
+                } else {
+                    oriImage.style.display = 'none'
+                    tableZone.style.display = 'block'
+                }
+                //console.log([oriImage.style.zIndex, tableZone.style.zIndex])
+
+            } else {
+                alert('Please select the object to be visualized in the left menu first')
+            }
+
+        }
+    </script>
+
+    <script type="text/javascript">
+        var tableSelect = document.getElementById('tableSelect')
+        tableSelect.onchange = function () {
+            const tableSelectValue = tableSelect.value
+            if (tableSelectValue != '--none--') {
+                const xhr = new XMLHttpRequest()
+                const idxValue = 'table'
+                const params = 'idx=' + idxValue + '&label=' + tableSelectValue
+                xhr.open('post', '/returnSearch')
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+                xhr.send(params)
+                xhr.onload = function () {
+                    myObj = JSON.parse(xhr.responseText);
+                    if (myObj.er === 'error') {
+                        alert('Failed to query data in Elasticsearch')
+                    } else {
+                        var txt = ''
+                        txt += "<table " + "class='table'>"
+                        txt += "<tr>"
+                        for (var header in myObj['col0']) {
+                            txt += "<th " + "class='cell'>" + header + "<th>"
+                        }
+                        txt += "<tr>"
+                        for (var x in myObj) {
+                            var para = "<td " + "class='cell'>"
+                            var inhalt = myObj[x]
+
+                            n = 0
+                            for (var xx in inhalt) {
+                                if (n == 0) {
+                                    txt = txt + '<tr>' + para + inhalt[xx] + para
+                                } else {
+                                    if (n != inhalt.length - 1) {
+                                        txt += para + inhalt[xx] + para
+                                    } else {
+                                        txt += para + inhalt[xx] + para + '<tr>'
+                                    }
+                                }
+                                n++
+                            }
+                        }
+                        txt += "</table>"
+                        document.getElementById("wp-right").innerHTML = txt;
+                    }
+                }
+            }
+            else {
+                alert('Please select a table of the image')
+            }
+        }
+    </script>
+
+    <script type="text/javascript">
+        const btnContinue = document.getElementById('continue')
+        btnContinue.onclick = function () {
+            var mg = confirm('to load the last unfinished task or not')
+            if (mg) {
+                //断点加载之前所有需要的查询栏！
+            }
+            else {
+                alert('Abandon loading, please remember to clear the data so as not to affect subsequent tasks.')
+            }
+        }
+    </script>
+
+</body>
 
 </html>

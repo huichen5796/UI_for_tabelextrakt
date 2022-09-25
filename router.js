@@ -10,6 +10,8 @@ router.post('/returnSearch', router_handler.returnSearch)
 
 router.post('/searchLabel', router_handler.searchLabel)
 
-router.post('/imageOriShow', router_handler.imageOriSchow)
+router.post('/seeResult', router_handler.seeResult)
+
+router.post('/clean', router_handler.cleanAll)
 
 module.exports = router;

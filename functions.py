@@ -568,7 +568,7 @@ def PositionTable(img_1024, img_path, model_used):
     table_boundRect = sorted(table_boundRect, key=lambda x: x[1])
 
     # draw bounding boxes
-    color = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 0, 255)]
+    color = [(15, 165, 230), (92, 92, 205), (238, 134, 28), (152, 251, 152)]
     i = 0
     color_image = np.ones((1024, 1024, 3), np.uint8)*255
     for x, y, w, h in table_boundRect:
@@ -582,6 +582,9 @@ def PositionTable(img_1024, img_path, model_used):
             i = 0
 
     image_add = cv2.addWeighted(img_1024, 0.9, color_image, 0.5, 0)
+ 
+    cv2.imwrite('assets\\imageShow\\{}'.format(
+            'table_of_' + str(os.path.basename(img_path))), image_add)
 
     if __name__ == '__main__':
         plt.subplot(221)

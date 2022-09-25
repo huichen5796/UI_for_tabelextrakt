@@ -21,9 +21,20 @@ exports.upload = (req, res) => {
         const py = spawn('python', ['main.py', imagePathStr])
 
         /* Output the print content in the py file */
-        py.stdout.on('data', function (result) { })
-        res.send(imagePath)
-        console.log('success ' + "todo: 'savePath'")
+        py.stdout.on('data', function (result) {
+            const data = JSON.parse(result.toString())
+            // console.log(data)
+            if (data.massage === 'success') {
+                // console.log(data)
+                res.send(data)
+
+                console.log('success ' + "todo: 'savePath'")
+            } else {
+                console.log('error ' + "todo: 'savePath'")
+            }
+        })
+
+
     })
 }
 
@@ -41,6 +52,7 @@ exports.runPy = (req, res) => {
     /* Output the print content in the py file */
     py.stdout.on('data', function (result) {
         const data = JSON.parse(result.toString())
+        // console.log(data)
         res.send(data)
         console.log('success ' + "todo: 'run'")
     })
@@ -61,8 +73,15 @@ exports.returnSearch = (req, res) => {
     py.stdout.on('data', function (resultSearch) {
         const data = JSON.parse(resultSearch.toString())
         // console.log(data)
-        res.send(data)
-        console.log('success ' + "todo: 'search'")
+        if (data.er === 'error') {
+            res.send(data)
+            console.log('error ' + "todo: 'search'")
+        } else {
+            // console.log(data)
+            res.send(data)
+            console.log('success ' + "todo: 'search'")
+        }
+
     })
 }
 
@@ -80,16 +99,22 @@ exports.searchLabel = (req, res) => {
     /* Output the print content in the py file */
     py.stdout.on('data', function (resultSearch) {
         const data = resultSearch.toString()
-        // console.log('Add labels ' + data)
-        res.send(data)
-        console.log('success ' + "todo: 'searchLabel'")
+        // console.log(data)
+        if (data === '["error"]') {
+            res.send(data)
+            console.log('error ' + "todo: 'searchLabel'")
+        } else {
+            // console.log('Add labels ' + data)
+            res.send(data)
+            console.log('success ' + "todo: 'searchLabel'")
+        }
     })
 }
 
-exports.imageOriSchow = (req, res) => {
+exports.seeResult = (req, res) => {
     const body = req.body
     const search = {
-        'todo': 'showOri',
+        'todo': 'seeResult',
         'image': body.image,
     }
     console.log(search)
@@ -99,7 +124,38 @@ exports.imageOriSchow = (req, res) => {
     /* Output the print content in the py file */
     py.stdout.on('data', function (result) {
         const data = JSON.parse(result.toString())
-        res.send(data)
-        console.log('success ' + "todo: 'schowOri'")
+        // console.log(data)
+        if (data.massage == 'success') {
+            res.send(data)
+            console.log('success ' + "todo: 'seeDetail'")
+        } else {
+            res.send(data)
+            console.log('error ' + "todo: 'seeDetail'")
+        }
+
+    })
+}
+
+exports.cleanAll = (req, res) => {
+    const body = req.body
+    const clean = {
+        'todo': body.todo,
+    }
+    console.log(clean)
+    const cleanStr = JSON.stringify(clean)
+    const py = spawn('python', ['main.py', cleanStr])
+
+    /* Output the print content in the py file */
+    py.stdout.on('data', function (result) {
+        const data = JSON.parse(result.toString())
+        // console.log(data)
+        if (data.massage == 'success') {
+            res.send(data)
+            console.log('success ' + "todo: " + body.todo)
+        } else {
+            res.send(data)
+            console.log('error ' + "todo: " + body.todo)
+        }
+
     })
 }

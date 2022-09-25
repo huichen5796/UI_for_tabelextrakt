@@ -10,6 +10,9 @@ import os
 import torch
 import torch.nn as nn
 import torchvision
+from elasticsearch import Elasticsearch
+from elasticsearch import helpers
+es = Elasticsearch()
 
 class DenseNet(nn.Module):
     def __init__(self, pretrained=True, requires_grad=True):
@@ -108,96 +111,166 @@ class TableNet(nn.Module):
 def receivePara():
     msg = sys.argv[1]
     msg = eval(msg)
-    #msg = { 'todo': 'run', 'file': 'test4.jpg', 'model': 'densenet' }
+    #msg = {'todo': 'cleanAll'}
     if msg['todo'] == 'run':
-        f = open('assets\\uploads\\originalName.txt', 'r')
-        info_list=[]
-        for line in f.readlines():
-            if re.search(msg['file'], line) != None:
-                info = eval(line.split('\n')[0])
-                info_list.append(info)
-        blob_path = 'assets' + info_list[-1]['path']
-
-        with open(blob_path,'rb') as f:
-        
-            image = np.frombuffer(f.read(), np.int8)
-            image = cv2.imdecode(image, cv2.IMREAD_COLOR)
-        
-            #cv2.imshow('', image)
-            #cv2.waitKey()
-
-        file_name = info_list[-1]['fileName']
-        model = msg['model']
         try:
+            f = open('assets\\uploads\\originalName.txt', 'r')
+            info_list = []
+            for line in f.readlines():
+                if re.search(msg['file'], line) != None:
+                    info = eval(line.split('\n')[0])
+                    info_list.append(info)
+            blob_path = 'assets' + info_list[-1]['path']
+
+            with open(blob_path, 'rb') as f:
+
+                image = np.frombuffer(f.read(), np.int8)
+                image = cv2.imdecode(image, cv2.IMREAD_COLOR)
+
+                #cv2.imshow('', image)
+                # cv2.waitKey()
+
+            file_name = info_list[-1]['fileName']
+            model = msg['model']
+        #try:
             shape_list = list(image.shape)
             if len(shape_list) == 3:
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            
+
             image_rotate = TiltCorrection(image)  # got gray
             img_3channel = cv2.cvtColor(
                 image_rotate, cv2.COLOR_GRAY2BGR)  # gray to 3 channel
 
             img_1024 = SizeNormalize(img_3channel)
             table_boundRect = PositionTable(
-                img_1024, '_', model)  # unet besser
+                img_1024, file_name, model)  # unet besser
             table_zone = GetTableZone(table_boundRect, img_1024)
             img_path = 'assets\\imageShow\\' + file_name
             for nummer, table in enumerate(table_zone):
                 SaveTable(nummer, table, img_path, [],
-                        model, [])  # densecol besser
-            if len(table_boundRect) == 0:
-                massage = 'assets\\imageShow\\noTable.png'
+                          model, [])  # densecol besser
+
+            '''mass=[]
+            number = len(table_zone)
+            for i in range(1, number+1):
+                mass.append('"the %sst table of %s":"imageShow\\table_%s_of_%s"' %(i, msg['file'], i, msg['file']))'''
+
+            if len(table_boundRect) != 0:
+                #res = "{'massage':'getTable'," + ','.join(mass) + '}'
+                res = {
+                    'massage': 'getTable'
+                }
             else:
-                massage = 'assets\\imageShow\\{}'.format('table_' + str(nummer+1) + '_of_' + str(os.path.basename(img_path)))
-            res = {
-            'path':massage
+                res = {
+                    'massage': 'noTable'
+                }
+
+            relation = {
+                'file': file_name,
+                'tableNumber': str(len(table_zone))
             }
+
+            with open('assets\\imageShow\\relation.txt', 'a+') as f:
+                f.write(str(relation)+'\n')
+
             print(json.dumps(res))
 
         except Exception as e:
-            massage =  'error'
-
             res = {
-                'path':massage
+                'massage': 'error'
             }
             print(json.dumps(res))
 
     if msg['todo'] == 'search':
-        results = Search(msg['idx'], msg['label'])
-        results = json.loads(results)['hits']['hits']
-        table = {}
+        try:
+            results = Search(msg['idx'], msg['label'])
+            results = json.loads(results)['hits']['hits']
+            table = {}
 
-        for i, result in enumerate(results):
-            del result['_source']['uniqueId']
-            del result['_source']['fileName']
-            table['col%s' % i] = result['_source']
+            for i, result in enumerate(results):
+                del result['_source']['uniqueId']
+                del result['_source']['fileName']
+                table['col%s' % i] = result['_source']
 
-        print(json.dumps(table))
+            print(json.dumps(table))
+        except:
+            print(json.dumps({'er':'error'}))
 
     if msg['todo'] == 'searchLabel':
-        uniqueId_list = []
-        res = Search('table', 'all')
-        res = json.loads(res)['hits']['hits']
-        for ress in res:
-            uniqueId_list.append(ress['_source']['uniqueId'])
-        uniqueId_list = list(set(uniqueId_list))
+       
+        try:
+            uniqueId_list = []
+            res = Search('table', 'all')
+            res = json.loads(res)['hits']['hits']
+            for ress in res:
+                uniqueId_list.append(ress['_source']['uniqueId'])
+            uniqueId_list = list(set(uniqueId_list))
 
-        print(uniqueId_list)
+            print(uniqueId_list)
+        except:
+            print('["error"]')
 
     if msg['todo'] == 'savePath':
-        with open('assets\\uploads\\originalName.txt', 'a+') as f:
-            f.write(str(msg)+'\n')
-            
-    if msg['todo'] == 'showOri':
-        f = open('assets\\uploads\\originalName.txt', 'r')
-        info_list=[]
-        for line in f.readlines():
-            if re.search(msg['image'], line) != None:
-                info = eval(line.split('\n')[0])
-                info_list.append(info)
-        print(json.dumps({'path':info_list[-1]['path']}))
-    # sys.stdout.flush()
+        try:
+            with open('assets/uploads/originalName.txt', 'a+') as f:
+                f.write(str(msg).replace('\\', '/').replace('//', '/')+'\n')
+            print(json.dumps({'massage': 'success',
+                'fileName': '["'+msg['fileName']+'"]'}))
+        except:
+            print(json.dumps({'massage': 'success',}))
+
+    if msg['todo'] == 'seeResult':
+        try:
+            f = open('assets/uploads/originalName.txt', 'r')
+            path_list = []
+            for line in f.readlines():
+                if re.search(msg['image'], line) != None:
+                    path = eval(line.split('\n')[0])
+                    path_list.append(path)
+
+            f = open('assets\\imageShow\\relation.txt', 'r')
+            info_list = []
+            for line in f.readlines():
+                if re.search(msg['image'], line) != None:
+                    info = eval(line.split('\n')[0])
+                    info_list.append(info)
+            mass = []
+            number = int(info_list[-1]['tableNumber'])
+            for i in range(1, number+1):
+                mass.append('"the_%sst_table_of_%s":"imageShow/table_%s_of_%s"' %
+                            (i, msg['image'].split('.')[0], i, msg['image'].split('.')[0]))
+
+            print(json.dumps('{"massage":"success","fileName":"'+str(
+                msg['image'])+'","path":"'+path_list[-1]['path']+'",'+",".join(mass)+'}'))
+        except:
+            print(json.dumps({'massage': "error"}))
+
+    if msg['todo'] == 'cleanAll':
+        try:
+            for file in os.listdir('assets/uploads'):
+                file = os.path.join('assets/uploads', file)
+                os.remove(file)
+            f = open('assets/uploads/originalName.txt', 'w')
+            f.close()
+            for file in os.listdir('assets/imageShow'):
+                file = os.path.join('assets/imageShow', file)
+                os.remove(file)
+            f = open('assets/imageShow/relation.txt', 'w')
+            f.close()
+
+            es.indices.delete(index='table', ignore=[400, 404])  # deletes whole index
+
+            print(json.dumps({'massage':'success'}))
+        except:
+            print(json.dumps({'massage':'error'}))
+
+    if msg['todo'] == 'cleanEla':
+        try:
+            es.indices.delete(index='table', ignore=[400, 404])  # deletes whole index
+
+            print(json.dumps({'massage':'success'}))
+        except:
+            print(json.dumps({'massage':'error'}))
 
 
 receivePara()
-
