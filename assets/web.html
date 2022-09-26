@@ -140,7 +140,7 @@
             border-width: thin;
             border-color: black;
             text-align: center;
-
+            white-space: nowrap;
         }
 
         .wp-right {
@@ -155,6 +155,7 @@
             border-width: thin;
             border-color: black;
             text-align: center;
+            white-space: nowrap;
         }
 
         .hidden-button {
@@ -171,10 +172,20 @@
         }
 
         .table {
-            margin: 40 auto;
             border: 2px solid black;
             border-collapse: collapse;
             border-spacing: 0px;
+            max-height: 100%;
+            max-width: 100%;
+            width: auto;
+            height: auto;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+            font-size: 10px;
         }
 
         .cell {
@@ -204,16 +215,17 @@
             color: rgb(230, 165, 15);
         }
 
-        .imageHeight {
-            height: 100%;
-            vertical-align: middle;
-
-        }
-
-        .imageWidth {
-            width: 100%;
-            vertical-align: middle;
-
+        .image {
+            max-height: 100%;
+            max-width: 100%;
+            width: auto;
+            height: auto;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
         }
 
         .table-select {
@@ -240,6 +252,29 @@
 
         }
 
+        .menu-up {
+            width: 40%;
+            height: 15px;
+            align-items: center;
+            padding: 2px;
+            font-size: 14px;
+            font-family: Arial;
+            font-weight: bold;
+            border-radius: 25px;
+            margin-top: 10px;
+            -webkit-transition-duration: 0.4s;
+            transition-duration: 0.4s;
+            text-align: center;
+            background-color: white;
+            color: rgb(230, 165, 15);
+            border: 2px solid rgb(230, 165, 15);
+            border-radius: 5px;
+        }
+
+        .menu-up:hover {
+            background-color: rgb(230, 165, 15);
+            color: white;
+        }
     </style>
 
 </head>
@@ -250,10 +285,15 @@
     <div class="label"><img src="label.jpg" width="50px" height="50px" /></div>
     <div id='menu-box' class="menu-box" style="display: block;">
 
-        <form id="uploader">
+        <form id="uploader" enctype="multipart/form-data">
             <div class="menu-title">MENU</div>
-            <div class="menu-item">--upload folder--</div>
-            <input type="file" name='file' id="file" />
+            <div class="menu-item">--upload image--</div>
+            <label class="menu-up" for="xFile">&nbsp;An Image&nbsp;</label><label>&nbsp;</label><label class="menu-up"
+                for="xMulti">&nbsp;Multi Images&nbsp;</label>
+            <label>&nbsp;</label><label class="menu-up" for="xFolder">&nbsp;A Folder&nbsp;</label>
+            <input type="file" name = 'xFile' id='xFile' style="position:absolute;clip:rect(0 0 0 0)">
+            <input type="file" name = 'xMulti' id='xMulti' style="position:absolute;clip:rect(0 0 0 0)" multiple>
+            <input type="file" name = 'xFolder' id='xFolder' style="position:absolute;clip:rect(0 0 0 0)" webkitdirectory>
             <div class="progress">
                 <div id='bar' class="progress-bar" style="width:0%;"></div>
             </div>
@@ -279,9 +319,104 @@
         <script type="text/javascript">
             const btnRun = document.getElementById('btnRun')
             const uploader = document.getElementById('uploader')
-            const fileUp = document.getElementById('file')
+            const fileUp = document.getElementById('xFile')
             const imageSearch = document.getElementById('image')
             const btnShow = document.getElementById('btnShow')
+            const folderUp = document.getElementById('xFolder')
+            const MultiUp = document.getElementById('xMulti')
+
+            MultiUp.onchange = function () {
+                const xhr = new XMLHttpRequest()
+                var f = new FormData()
+                for (i = 0; i < (this.files).length; i++) {
+                    f.append('attrName' + String(i), this.files[i])
+                    xhr.open('post', '/uploadStapel')
+
+                    xhr.upload.onprogress = function (ev) {
+                        var result = (ev.loaded / ev.total) * 100 + '%'
+                        var bar = document.getElementById('bar')
+                        var barNumber = document.getElementById('bar-number')
+                        bar.style.width = result
+                        barNumber.innerHTML = result
+                    }
+                }
+                xhr.send(f)
+                /*
+                xhr.onload = function () {
+                    var result = JSON.parse(xhr.responseText)
+                    if (result.massage === 'success') {
+                        var label_list = eval(result.fileName)
+ 
+                        var label_oldoptions = document.getElementById('image').options
+                        var label_old = []
+                        for (let i = 0; i < label_oldoptions.length; i++) {
+                            label_old.push(label_oldoptions[i].value)
+                        }
+                        // console.log(label_old)
+                        for (let i = 0; i < label_list.length; i++) {
+                            if (label_old.indexOf(label_list[i]) === -1) {
+                                var label_new = label_list[i]
+                                var board = document.getElementById("image");
+                                var e = document.createElement("option");
+                                e.value = label_new
+                                e.text = label_new
+                                var object = board.appendChild(e);
+                            }
+                        }
+                        alert('files upload success')
+                    } else {
+                        alert('Backend error of upload')
+                    }
+                }*/
+
+            }
+
+            folderUp.onchange = function () {
+                const xhr = new XMLHttpRequest()
+                var f = new FormData()
+                for (i = 0; i < (this.files).length; i++) {
+                    
+                    f.append('attrName' + String(i), this.files[i])
+                    xhr.open('post', '/uploadStapel')
+
+                    xhr.upload.onprogress = function (ev) {
+                        var result = (ev.loaded / ev.total) * 100 + '%'
+                        var bar = document.getElementById('bar')
+                        var barNumber = document.getElementById('bar-number')
+                        bar.style.width = result
+                        barNumber.innerHTML = result
+                    }
+                }
+                xhr.send(f)
+                /*
+                xhr.onload = function () {
+                    var result = JSON.parse(xhr.responseText)
+                    if (result.massage === 'success') {
+                        var label_list = eval(result.fileName)
+ 
+                        var label_oldoptions = document.getElementById('image').options
+                        var label_old = []
+                        for (let i = 0; i < label_oldoptions.length; i++) {
+                            label_old.push(label_oldoptions[i].value)
+                        }
+                        // console.log(label_old)
+                        for (let i = 0; i < label_list.length; i++) {
+                            if (label_old.indexOf(label_list[i]) === -1) {
+                                var label_new = label_list[i]
+                                var board = document.getElementById("image");
+                                var e = document.createElement("option");
+                                e.value = label_new
+                                e.text = label_new
+                                var object = board.appendChild(e);
+                            }
+                        }
+                        alert('files upload success')
+                    } else {
+                        alert('Backend error of upload')
+                    }
+                }*/
+
+            }
 
             fileUp.onchange = function () {
                 const xhr = new XMLHttpRequest()
@@ -320,8 +455,9 @@
                                 var object = board.appendChild(e);
                             }
                         }
+                        alert('files upload success')
                     } else {
-                        alert('Backend error')
+                        alert('Backend error of upload')
                     }
                 }
             }
@@ -335,7 +471,7 @@
                 else {
                     const xhr = new XMLHttpRequest()
                     const params = 'image=' + imageValue
-                    xhr.open('post', '/seeResult')
+                    xhr.open('post', '/seeDetail')
                     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
                     xhr.send(params)
 
@@ -344,18 +480,13 @@
                         var resultKeys = Object.keys(result)
                         if (result.massage === 'success') {
                             var imgo = document.createElement('img')
-                            var i = new Image()
-                            var naturalWidth, naturalHeight
+                            // var i = new Image()
+                            // var naturalWidth, naturalHeight
                             imgo.src = result.path
                             // console.log(imgo.src)
                             imgo.onload = function () {
-                                naturalWidth = this.width
-                                naturalHeight = this.height
-                                if (naturalHeight >= naturalWidth) {
-                                    imgo.className = 'imageHeight'
-                                } else {
-                                    imgo.className = 'imageWidth'
-                                }
+
+                                imgo.className = 'image'
                                 var wp_left = document.getElementById('wp-left')
                                 var child = wp_left.lastElementChild
                                 while (child) {
@@ -387,18 +518,12 @@
                             }
 
                             var img = document.createElement('img')
-                            var i = new Image()
-                            var naturalWidth, naturalHeight
+                            // var i = new Image()
+                            // var naturalWidth, naturalHeight
                             img.src = 'imageShow/table_of_' + result.fileName
                             // console.log(img.src)
                             img.onload = function () {
-                                naturalWidth = this.width
-                                naturalHeight = this.height
-                                if (naturalHeight >= naturalWidth) {
-                                    img.className = 'imageHeight'
-                                } else {
-                                    img.className = 'imageWidth'
-                                }
+                                img.className = 'image'
                                 var wp_left_hind = document.getElementById('wp-left-hind')
                                 var child = wp_left_hind.lastElementChild
                                 while (child) {
@@ -417,9 +542,11 @@
             btnRun.onclick = function () {
                 var formData = new FormData(uploader)
 
-                if (formData.get('file').name != "" && formData.get('model') != null) {
+                var filesTodo = formData.get('xFile').name //这里应适应于多图片上传结果，可能可以放进一个列表？把列表里的元素挨个拿出来进行加工可能更有效率一点。但是可能会由于电脑性能原因导致还没加入txt就开始查询从而运行失败，解决方案，在上传的时候写入
+
+                if (filesTodo != "" && formData.get('model') != null) {
                     const xhr = new XMLHttpRequest()
-                    const parameter = 'file=' + formData.get('file').name + '&model=' + formData.get('model')
+                    const parameter = 'file=' + filesTodo + '&model=' + formData.get('model')
                     xhr.open('post', '/run')
                     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
                     xhr.send(parameter)
@@ -428,18 +555,18 @@
                         if (result.massage === 'success') {
                             alert('Run success, please select a file to see result')
                         } else {
-                            alert('Run failed, please see README.md to find countermeasures')
+                            alert('Run failed, please wait for the file upload to complete and try again od see README.md to find countermeasures')
                         }
 
                     }
                 }
-                else if (formData.get('file').name == "" && formData.get('model') != null) {
+                else if (filesTodo == "" && formData.get('model') != null) {
                     alert('No file uploaded')
                 }
-                else if (formData.get('file').name != "" && formData.get('model') == null) {
+                else if (filesTodo != "" && formData.get('model') == null) {
                     alert('No model selected')
                 }
-                else if (formData.get('file').name == "" && formData.get('model') == null) {
+                else if (filesTodo == "" && formData.get('model') == null) {
                     alert('Please upload files and select model to use')
                 }
             }
@@ -664,18 +791,18 @@
         </div>
         <input type="button" id="hiddenB" class="hidden-button">
         <div id='wp-left' class="wp-left" style="display:block">
-            
+
         </div>
         <div id="wp-left-hind" class="wp-left" style="display:none">
-            
+
         </div>
 
         <div id="wp-left-hind2" class="wp-left" style="display:none">
-            
+
         </div>
 
         <div id='wp-right' class="wp-right">
-            
+
         </div>
     </div>
     <script type="text/javascript">
@@ -718,7 +845,7 @@
                     } else {
                         oriImage.style.display = 'none'
                         tableZone.style.display = 'block'
-                    }
+                    } tableZone
                 } else {
                     if (oneTable.style.display == 'block') {
                         oriImage.style.display = 'block'
@@ -787,18 +914,19 @@
 
                         //creatimage src=result.label
                         var img = document.createElement('img')
-                        var i = new Image()
-                        var naturalWidth, naturalHeight
+                        // var i = new Image()
+                        // var naturalWidth, naturalHeight
                         img.src = 'imageShow/' + result.label
                         // console.log(img.src)
                         img.onload = function () {
-                            naturalWidth = this.width
-                            naturalHeight = this.height
-                            if (naturalHeight >= naturalWidth) {
-                                img.className = 'imageHeight'
-                            } else {
-                                img.className = 'imageWidth'
-                            }
+                            // naturalWidth = this.width
+                            // naturalHeight = this.height
+                            // if (naturalHeight >= naturalWidth) {
+                            //     img.className = 'imageHeight'
+                            // } else {
+                            //     img.className = 'imageWidth'
+                            // }
+                            img.className = 'image'
                             var wp_left_hind2 = document.getElementById('wp-left-hind2')
                             var wp_left_hind = document.getElementById('wp-left-hind')
                             var wp_left = document.getElementById('wp-left')

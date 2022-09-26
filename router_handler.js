@@ -2,6 +2,24 @@ const spawn = require('child_process').spawn
 const formidable = require('formidable')
 const path = require('path')
 
+exports.uploadStapel = (req, res) => {
+    const form = new formidable.IncomingForm()
+    form.uploadDir = path.join(__dirname, 'assets', 'uploads')
+
+    form.keepExtenSions = true
+    let arr = []
+
+    form.on('file', (name, file) => {
+        arr.push([file.filepath, file.originalFilename])
+
+    })
+
+    form.parse(req, (err, fields, files) => {
+        console.log(arr)
+
+    })
+}
+
 exports.upload = (req, res) => {
     const form = new formidable.IncomingForm()
     form.uploadDir = path.join(__dirname, 'assets', 'uploads')
@@ -9,9 +27,9 @@ exports.upload = (req, res) => {
     form.keepExtenSions = true
     form.parse(req, (err, fields, files) => {
         var imagePath = {
-            todo: 'savePath',
+            todo: 'upload',
             path: files.attrName.filepath.split('assets')[1],
-            fileBinarName: files.attrName.filepath.split("uploads\\")[1],
+            // fileBinarName: files.attrName.filepath.split("uploads\\")[1],
             fileName: files.attrName.originalFilename
         }
         console.log(imagePath)
@@ -28,9 +46,9 @@ exports.upload = (req, res) => {
                 // console.log(data)
                 res.send(data)
 
-                console.log('success ' + "todo: 'savePath'")
+                console.log('success ' + "todo: 'upload'")
             } else {
-                console.log('error ' + "todo: 'savePath'")
+                console.log('error ' + "todo: 'upload'")
             }
         })
 
@@ -57,7 +75,7 @@ exports.runPy = (req, res) => {
             res.send(data)
             console.log('success ' + "todo: 'run'")
         }
-        else{
+        else {
             res.send(data)
             console.log('error ' + "todo: 'run'")
         }
@@ -118,10 +136,10 @@ exports.searchLabel = (req, res) => {
     })
 }
 
-exports.seeResult = (req, res) => {
+exports.seeDetail = (req, res) => {
     const body = req.body
     const search = {
-        'todo': 'seeResult',
+        'todo': 'seeDetail',
         'image': body.image,
     }
     console.log(search)
@@ -131,7 +149,7 @@ exports.seeResult = (req, res) => {
     /* Output the print content in the py file */
     py.stdout.on('data', function (result) {
         const data = JSON.parse(result.toString())
-        // console.log(data)
+        console.log(data.massage)
         if (data.massage == 'success') {
             res.send(data)
             console.log('success ' + "todo: 'seeDetail'")

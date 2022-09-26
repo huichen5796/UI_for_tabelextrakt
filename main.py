@@ -112,7 +112,7 @@ class TableNet(nn.Module):
 def receivePara():
     msg = sys.argv[1]
     msg = eval(msg)
-    #msg = {'todo': 'continue'}
+    #msg = { 'todo': 'seeResult', 'image': 'test3.png' }
     if msg['todo'] == 'run':
         try:
             f = open('assets\\uploads\\originalName.txt', 'r')
@@ -207,7 +207,7 @@ def receivePara():
         except:
             print('["error"]')
 
-    if msg['todo'] == 'savePath':
+    if msg['todo'] == 'upload':
         try:
             with open('assets/uploads/originalName.txt', 'a+') as f:
                 f.write(str(msg).replace('\\', '/').replace('//', '/')+'\n')
@@ -216,7 +216,7 @@ def receivePara():
         except:
             print(json.dumps({'massage': 'error', }))
 
-    if msg['todo'] == 'seeResult':
+    if msg['todo'] == 'seeDetail':
         try:
             f = open('assets/uploads/originalName.txt', 'r')
             path_list = []
@@ -231,14 +231,17 @@ def receivePara():
                 if re.search(msg['image'], line) != None:
                     info = eval(line.split('\n')[0])
                     info_list.append(info)
-            mass = []
+            resInfo = {
+                'massage':'success',
+                'fileName':msg['image'],
+                'path':path_list[-1]['path'],
+            }
             number = int(info_list[-1]['tableNumber'])
             for i in range(1, number+1):
-                mass.append('"the_%sst_table_of_%s":"imageShow/table_%s_of_%s"' %
-                            (i, msg['image'], i, msg['image']))
-
-            print(json.dumps('{"massage":"success","fileName":"'+str(
-                msg['image'])+'","path":"'+path_list[-1]['path']+'",'+",".join(mass)+'}'))
+                resInfo['the_%sst_table_of_%s' %(i, msg['image'])] = "imageShow/table_%s_of_%s" %(i, msg['image'])
+    
+            print(json.dumps(resInfo))
+ 
         except:
             print(json.dumps({'massage': "error"}))
 

@@ -10,10 +10,11 @@ router.post('/returnSearch', router_handler.returnSearch)
 
 router.post('/searchLabel', router_handler.searchLabel)
 
-router.post('/seeResult', router_handler.seeResult)
+router.post('/seeDetail', router_handler.seeDetail)
 
 router.post('/clean', router_handler.cleanAll)
 
 router.post('/continue', router_handler.continue)
 
+router.post('/uploadStapel', router_handler.uploadStapel)
 module.exports = router;

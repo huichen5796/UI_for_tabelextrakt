@@ -568,7 +568,7 @@ def PositionTable(img_1024, img_path, model_used):
     table_boundRect = sorted(table_boundRect, key=lambda x: x[1])
 
     # draw bounding boxes
-    color = [(15, 165, 230), (92, 92, 205), (238, 134, 28), (152, 251, 152)]
+    color = [(0, 0, 200), (200, 0, 0), (238, 134, 28), (152, 251, 152)]
     i = 0
     color_image = np.ones((1024, 1024, 3), np.uint8)*255
     for x, y, w, h in table_boundRect:
