@@ -1561,6 +1561,37 @@ def Search(index_, uniqueId):
     # print(data_print.decode()) # pretty-print with indent level
     return data_print.decode()
 
+
+def SaveExcel(tableId):
+    saveRoot = 'assets/excelStore/'
+    savePath = saveRoot + os.path.splitext(tableId)[0] + '.xlsx'
+    writer = pd.ExcelWriter(savePath, engine='xlsxwriter')
+    uniqueId_list = []
+    if tableId == 'all':
+        res = Search('table', 'all')
+        res = json.loads(res)['hits']['hits']
+        for re in res:
+            uniqueId_list.append(re['_source']['uniqueId'])
+        uniqueId_list = list(set(uniqueId_list))
+    else:
+        uniqueId_list.append(tableId)
+    
+    for i, label in enumerate(uniqueId_list):
+
+        table = []
+        results = Search('table', str(label))
+        results = json.loads(results)['hits']['hits']
+        for result in results:
+            del result['_source']['uniqueId']
+            del result['_source']['fileName']
+            table.append(result['_source'])
+        df = pd.DataFrame(table)
+        # df.index.name = label
+        df.to_excel(writer, sheet_name=label)
+
+    writer.save()
+
+    return os.path.splitext(tableId)[0] + '.xlsx'
 #---------------------------------------------------------------------------------------------------------------#
 
 

@@ -2,12 +2,13 @@ import base64
 from email.mime import base
 import sys
 import json
-from functions import Search, TiltCorrection, SizeNormalize, PositionTable, GetTableZone, SaveTable
+from functions import Search, TiltCorrection, SizeNormalize, PositionTable, GetTableZone, SaveTable, SaveExcel
 import re
 import numpy as np
 import cv2
 import os
 import torch
+from file_read_backwards import FileReadBackwards
 import torch.nn as nn
 import torchvision
 from elasticsearch import Elasticsearch
@@ -109,64 +110,71 @@ class TableNet(nn.Module):
         return table_out
 
 
+def Run(line, model):
+    info = eval(line.split('\n')[0])
+    blob_path = 'assets' + info['path']
+    file_name = info['fileName'].split('/')[-1]
+
+    with open(blob_path, 'rb') as f:
+
+        image = np.frombuffer(f.read(), np.int8)
+        image = cv2.imdecode(image, cv2.IMREAD_COLOR)
+
+        #cv2.imshow('', image)
+        # cv2.waitKey()
+
+    shape_list = list(image.shape)
+    if len(shape_list) == 3:
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    image_rotate = TiltCorrection(image)  # got gray
+    img_3channel = cv2.cvtColor(
+        image_rotate, cv2.COLOR_GRAY2BGR)  # gray to 3 channel
+
+    img_1024 = SizeNormalize(img_3channel)
+    table_boundRect = PositionTable(
+        img_1024, file_name, model)  # unet besser
+    table_zone = GetTableZone(table_boundRect, img_1024)
+    img_path = 'assets\\imageShow\\' + file_name
+    for nummer, table in enumerate(table_zone):
+        SaveTable(nummer, table, img_path, [],
+                  model, [])  # densecol besser
+
+    relation = {
+        'file': file_name,
+        'tableNumber': str(len(table_zone))
+    }
+
+    with open('assets\\imageShow\\relation.txt', 'a+') as f:
+        f.write(str(relation)+'\n')
+
+
 def receivePara():
     msg = sys.argv[1]
     msg = eval(msg)
-    #msg = { 'todo': 'seeResult', 'image': 'test3.png' }
+    #msg ={"todo":"run","model":'densenet'}
     if msg['todo'] == 'run':
         try:
-            f = open('assets\\uploads\\originalName.txt', 'r')
-            info_list = []
-            for line in f.readlines():
-                if re.search(msg['file'], line) != None:
-                    info = eval(line.split('\n')[0])
-                    info_list.append(info)
-            blob_path = 'assets' + info_list[-1]['path']
-
-            with open(blob_path, 'rb') as f:
-
-                image = np.frombuffer(f.read(), np.int8)
-                image = cv2.imdecode(image, cv2.IMREAD_COLOR)
-
-                #cv2.imshow('', image)
-                # cv2.waitKey()
-
-            file_name = info_list[-1]['fileName']
             model = msg['model']
-        # try:
-            shape_list = list(image.shape)
-            if len(shape_list) == 3:
-                image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-            image_rotate = TiltCorrection(image)  # got gray
-            img_3channel = cv2.cvtColor(
-                image_rotate, cv2.COLOR_GRAY2BGR)  # gray to 3 channel
-
-            img_1024 = SizeNormalize(img_3channel)
-            table_boundRect = PositionTable(
-                img_1024, file_name, model)  # unet besser
-            table_zone = GetTableZone(table_boundRect, img_1024)
-            img_path = 'assets\\imageShow\\' + file_name
-            for nummer, table in enumerate(table_zone):
-                SaveTable(nummer, table, img_path, [],
-                          model, [])  # densecol besser
+            with FileReadBackwards('assets\\uploads\\originalName.txt', encoding="utf-8") as fb: # deduplication of txt
+                fileName_list = []
+                for line in fb:
+                    try:
+                        # if re.search(msg['file'], line) != None:
+                        fileName = eval(line.split('\n')[0])['fileName'].split('/')[-1]
+                        if fileName not in fileName_list:
+                            fileName_list.append(fileName)
+                            Run(line, model)
+                    except:
+                        continue
 
             res = {
-                'massage': 'success',
-                'tableNumber': str(len(table_zone))
-                }
-            
-            relation = {
-                'file': file_name,
-                'tableNumber': str(len(table_zone))
+                'massage': 'success'
             }
-
-            with open('assets\\imageShow\\relation.txt', 'a+') as f:
-                f.write(str(relation)+'\n')
-
+            fileName_list = []
             print(json.dumps(res))
 
-        except Exception as e:
+        except:
             res = {
                 'massage': 'error'
             }
@@ -184,9 +192,9 @@ def receivePara():
                 table['col%s' % i] = result['_source']
 
             print(json.dumps({
-                'massage':'success',
-                'datas':table,
-                'label':msg['label']
+                'massage': 'success',
+                'datas': table,
+                'label': msg['label']
             }))
         except:
             print(json.dumps({
@@ -210,9 +218,23 @@ def receivePara():
     if msg['todo'] == 'upload':
         try:
             with open('assets/uploads/originalName.txt', 'a+') as f:
-                f.write(str(msg).replace('\\', '/').replace('//', '/')+'\n')
+                f.write(str(msg).replace('\\', '/').replace('//', '/').split('/assets')[-1]+'\n')
             print(json.dumps({'massage': 'success',
                               'fileName': '["'+msg['fileName']+'"]'}))
+        except:
+            print(json.dumps({'massage': 'error', }))
+
+    if msg['todo'] == 'uploadStapel':
+        try:
+            datas = list(msg['data'])
+            with open('assets/uploads/originalName.txt', 'a+') as f:
+                for data in datas:
+                    f.write(str(data).replace(
+                        '\\', '/').replace('//', '/')+'\n')
+            files = str([(data)['fileName'].split('/')[-1] for data in datas])
+            print(json.dumps({'massage': 'success',
+                              'files': files,
+                              }))
         except:
             print(json.dumps({'massage': 'error', }))
 
@@ -232,16 +254,17 @@ def receivePara():
                     info = eval(line.split('\n')[0])
                     info_list.append(info)
             resInfo = {
-                'massage':'success',
-                'fileName':msg['image'],
-                'path':path_list[-1]['path'],
+                'massage': 'success',
+                'fileName': msg['image'],
+                'path': path_list[-1]['path'],
             }
             number = int(info_list[-1]['tableNumber'])
             for i in range(1, number+1):
-                resInfo['the_%sst_table_of_%s' %(i, msg['image'])] = "imageShow/table_%s_of_%s" %(i, msg['image'])
-    
+                resInfo['the_%sst_table_of_%s' % (
+                    i, msg['image'])] = "imageShow/table_%s_of_%s" % (i, msg['image'])
+
             print(json.dumps(resInfo))
- 
+
         except:
             print(json.dumps({'massage': "error"}))
 
@@ -257,6 +280,9 @@ def receivePara():
                 os.remove(file)
             f = open('assets/imageShow/relation.txt', 'w')
             f.close()
+            for file in os.listdir('assets/excelStore'):
+                file = os.path.join('assets/excelStore', file)
+                os.remove(file)
 
             # deletes whole index
             es.indices.delete(index='table', ignore=[400, 404])
@@ -292,6 +318,24 @@ def receivePara():
                     }))
         except:
             print(json.dumps({'massage': 'error', }))
+
+    if msg['todo'] == 'saveExcel':
+        try:
+
+            tableId = msg['tableId']
+
+            saveName = SaveExcel(tableId)
+
+            res = {
+                'massage':'success',
+                'excelName':saveName
+            }
+            print(json.dumps(res))
+        except:
+            res = {
+                'massage':'error',
+            }
+            print(json.dumps(res))
 
 
 receivePara()

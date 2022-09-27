@@ -291,9 +291,9 @@
             <label class="menu-up" for="xFile">&nbsp;An Image&nbsp;</label><label>&nbsp;</label><label class="menu-up"
                 for="xMulti">&nbsp;Multi Images&nbsp;</label>
             <label>&nbsp;</label><label class="menu-up" for="xFolder">&nbsp;A Folder&nbsp;</label>
-            <input type="file" name = 'xFile' id='xFile' style="position:absolute;clip:rect(0 0 0 0)">
-            <input type="file" name = 'xMulti' id='xMulti' style="position:absolute;clip:rect(0 0 0 0)" multiple>
-            <input type="file" name = 'xFolder' id='xFolder' style="position:absolute;clip:rect(0 0 0 0)" webkitdirectory>
+            <input type="file" name='xFile' id='xFile' style="position:absolute;clip:rect(0 0 0 0)">
+            <input type="file" name='xMulti' id='xMulti' style="position:absolute;clip:rect(0 0 0 0)" multiple>
+            <input type="file" name='xFolder' id='xFolder' style="position:absolute;clip:rect(0 0 0 0)" webkitdirectory>
             <div class="progress">
                 <div id='bar' class="progress-bar" style="width:0%;"></div>
             </div>
@@ -341,12 +341,14 @@
                     }
                 }
                 xhr.send(f)
-                /*
+
                 xhr.onload = function () {
                     var result = JSON.parse(xhr.responseText)
                     if (result.massage === 'success') {
-                        var label_list = eval(result.fileName)
- 
+                        // console.log(result.files)
+                        var label_list = eval(result.files)
+                        // console.log(label_list)
+
                         var label_oldoptions = document.getElementById('image').options
                         var label_old = []
                         for (let i = 0; i < label_oldoptions.length; i++) {
@@ -367,7 +369,7 @@
                     } else {
                         alert('Backend error of upload')
                     }
-                }*/
+                }
 
             }
 
@@ -375,7 +377,7 @@
                 const xhr = new XMLHttpRequest()
                 var f = new FormData()
                 for (i = 0; i < (this.files).length; i++) {
-                    
+
                     f.append('attrName' + String(i), this.files[i])
                     xhr.open('post', '/uploadStapel')
 
@@ -388,12 +390,13 @@
                     }
                 }
                 xhr.send(f)
-                /*
                 xhr.onload = function () {
                     var result = JSON.parse(xhr.responseText)
                     if (result.massage === 'success') {
-                        var label_list = eval(result.fileName)
- 
+                        // console.log(result.files)
+                        var label_list = eval(result.files)
+                        // console.log(label_list)
+
                         var label_oldoptions = document.getElementById('image').options
                         var label_old = []
                         for (let i = 0; i < label_oldoptions.length; i++) {
@@ -414,7 +417,7 @@
                     } else {
                         alert('Backend error of upload')
                     }
-                }*/
+                }
 
             }
 
@@ -542,11 +545,9 @@
             btnRun.onclick = function () {
                 var formData = new FormData(uploader)
 
-                var filesTodo = formData.get('xFile').name //这里应适应于多图片上传结果，可能可以放进一个列表？把列表里的元素挨个拿出来进行加工可能更有效率一点。但是可能会由于电脑性能原因导致还没加入txt就开始查询从而运行失败，解决方案，在上传的时候写入
-
-                if (filesTodo != "" && formData.get('model') != null) {
+                if (formData.get('model') != null) {
                     const xhr = new XMLHttpRequest()
-                    const parameter = 'file=' + filesTodo + '&model=' + formData.get('model')
+                    const parameter = 'model=' + formData.get('model')
                     xhr.open('post', '/run')
                     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
                     xhr.send(parameter)
@@ -554,20 +555,16 @@
                         var result = JSON.parse(xhr.responseText)
                         if (result.massage === 'success') {
                             alert('Run success, please select a file to see result')
-                        } else {
+                        } else if (result.massage === 'error') {
                             alert('Run failed, please wait for the file upload to complete and try again od see README.md to find countermeasures')
+                        } else if (result.massage === 'notFound') {
+                            alert('No image uploaded')
                         }
 
                     }
                 }
-                else if (filesTodo == "" && formData.get('model') != null) {
-                    alert('No file uploaded')
-                }
-                else if (filesTodo != "" && formData.get('model') == null) {
+                else {
                     alert('No model selected')
-                }
-                else if (filesTodo == "" && formData.get('model') == null) {
-                    alert('Please upload files and select model to use')
                 }
             }
 
@@ -628,17 +625,53 @@
         </div>
         <input type="button" value="SHOW" id="btnShowTable" class="menu-button">
         <div class="menu-item">--save as Excel--</div>
-        <div class="menu-opt">
+        <div class="menu-opt" id="excel">
             select a table:
             <select id="selectExcel">
-                <option value="all" selected>all</option>
+                <option value="--none--" selected>--none--</option>
             </select>
+            <input type="button" value="GENERATE EXCEL" id="saveExcel" class="menu-button" style="width:170px">
+            <div id="dd" style="display: none;">click to download: <a id='download'></a></div>
         </div>
-        <input type="button" value="SAVE AS EXCEL" id="saveExcel" class="menu-button" style="width:150px">
+
         <div class="menu-item">Please choose carefully:</div>
         <input type="button" value="Clear all data in the Elasticsearch" id="cleanEla" class="menu-button-warn">
     </div>
     <script type="text/javascript">
+        const btnSaveExcel = document.getElementById('saveExcel')
+        btnSaveExcel.onclick = function () {
+            const tableId = document.getElementById('selectExcel')
+            if (tableId.value === '--none--') {
+                alert('Please load database at first')
+            }
+            else {
+                const xhr = new XMLHttpRequest()
+                const params = 'todo=saveExcel' + '&tableId=' + tableId.value
+                // console.log(tableId.value)
+                // console.log(params)
+                xhr.open('post', '/saveExcel')
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+                xhr.send(params)
+
+                xhr.onload = function () {
+                    var result = JSON.parse(xhr.responseText)
+                    if (result.massage === 'success') {
+                        const down = document.getElementById('download')
+                        const dd = document.getElementById('dd')
+                        dd.style.display = 'block'
+                        down.href = 'http://127.0.0.1:3000/excelStore/' + result.excelName
+                        // console.log(down.href)
+                        down.download = result.excelName
+                        down.text = result.excelName
+                        alert('save Excel success')
+                    } else {
+                        alert('failed to save Excel')
+                    }
+                }
+            }
+        }
+
+
         const btnCleanEla = document.getElementById('cleanEla')
         btnCleanEla.onclick = function () {
             var ms = confirm('This will clear all data on the elasticsearch unter index "table", do you choose to continue?')

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const router_handler = require('./router_handler.js') 
+const router_handler = require('./router_handler.js')
 
 router.post('/upload', router_handler.upload)
 
@@ -17,4 +17,7 @@ router.post('/clean', router_handler.cleanAll)
 router.post('/continue', router_handler.continue)
 
 router.post('/uploadStapel', router_handler.uploadStapel)
+
+router.post('/saveExcel', router_handler.saveExcel)
+
 module.exports = router;

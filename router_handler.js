@@ -10,12 +10,40 @@ exports.uploadStapel = (req, res) => {
     let arr = []
 
     form.on('file', (name, file) => {
-        arr.push([file.filepath, file.originalFilename])
-
+        arr.push({
+            todo: 'uploadStapel',
+            path: file.filepath.split('assets')[1],
+            fileName: file.originalFilename
+        })
     })
 
     form.parse(req, (err, fields, files) => {
-        console.log(arr)
+        var imagesPath = {
+            todo: 'uploadStapel',
+            data: arr
+        }
+        console.log({
+            todo: 'uploadStapel',
+            data: 'see details in arr'
+        })
+
+        const imagesPathStr = JSON.stringify(imagesPath)
+        // console.log(imagesPathStr)
+        const py = spawn('python', ['main.py', imagesPathStr])
+
+        /* Output the print content in the py file */
+        py.stdout.on('data', function (result) {
+            const data = JSON.parse(result.toString())
+            // console.log(data)
+            if (data.massage === 'success') {
+                // console.log(data)
+                res.send(data)
+
+                console.log('success ' + "todo: 'uploadStapel'")
+            } else {
+                console.log('error ' + "todo: 'uploadStapel'")
+            }
+        })
 
     })
 }
@@ -60,7 +88,6 @@ exports.runPy = (req, res) => {
     const body = req.body
     const run = {
         todo: 'run',
-        file: body.file,
         model: body.model,
     }
     console.log(run)
@@ -193,6 +220,31 @@ exports.continue = (req, res) => {
     console.log(cont)
     const contStr = JSON.stringify(cont)
     const py = spawn('python', ['main.py', contStr])
+
+    /* Output the print content in the py file */
+    py.stdout.on('data', function (result) {
+        const data = JSON.parse(result.toString())
+        // console.log(data)
+        if (data.massage == 'success') {
+            res.send(data)
+            console.log('success ' + "todo: " + body.todo)
+        } else {
+            res.send(data)
+            console.log('error ' + "todo: " + body.todo)
+        }
+
+    })
+}
+
+exports.saveExcel = (req, res) => {
+    const body = req.body
+    const saveEx = {
+        'todo': body.todo,
+        'tableId':body.tableId,
+    }
+    console.log(saveEx)
+    const saveExStr = JSON.stringify(saveEx)
+    const py = spawn('python', ['main.py', saveExStr])
 
     /* Output the print content in the py file */
     py.stdout.on('data', function (result) {
