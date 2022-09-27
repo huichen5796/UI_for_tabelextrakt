@@ -20,4 +20,6 @@ router.post('/uploadStapel', router_handler.uploadStapel)
 
 router.post('/saveExcel', router_handler.saveExcel)
 
+router.post('/getProgress', router_handler.getProgress)
+
 module.exports = router;

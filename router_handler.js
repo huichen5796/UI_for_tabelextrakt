@@ -176,7 +176,7 @@ exports.seeDetail = (req, res) => {
     /* Output the print content in the py file */
     py.stdout.on('data', function (result) {
         const data = JSON.parse(result.toString())
-        console.log(data.massage)
+        // console.log(data.massage)
         if (data.massage == 'success') {
             res.send(data)
             console.log('success ' + "todo: 'seeDetail'")
@@ -240,11 +240,35 @@ exports.saveExcel = (req, res) => {
     const body = req.body
     const saveEx = {
         'todo': body.todo,
-        'tableId':body.tableId,
+        'tableId': body.tableId,
     }
     console.log(saveEx)
     const saveExStr = JSON.stringify(saveEx)
     const py = spawn('python', ['main.py', saveExStr])
+
+    /* Output the print content in the py file */
+    py.stdout.on('data', function (result) {
+        const data = JSON.parse(result.toString())
+        // console.log(data)
+        if (data.massage == 'success') {
+            res.send(data)
+            console.log('success ' + "todo: " + body.todo)
+        } else {
+            res.send(data)
+            console.log('error ' + "todo: " + body.todo)
+        }
+
+    })
+}
+
+exports.getProgress = (req, res) => {
+    const body = req.body
+    const getP = {
+        'todo': body.todo,
+    }
+    console.log(getP)
+    const getPStr = JSON.stringify(getP)
+    const py = spawn('python', ['main.py', getPStr])
 
     /* Output the print content in the py file */
     py.stdout.on('data', function (result) {

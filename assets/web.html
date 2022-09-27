@@ -301,6 +301,27 @@
             background-color: rgb(230, 165, 15);
             color: white;
         }
+
+        .runBar {
+            height: 60px;
+            border-radius: 25px;
+            text-align: center;
+            background: repeating-linear-gradient(60deg, #fb3, rgb(158, 160, 26));
+            background-size: 20px 60px;
+
+        }
+
+        .runBar-outside {
+
+            height: 60px;
+            background-color: antiquewhite;
+            border-radius: 25px;
+            width: 60%;
+            margin-top: 22%;
+            margin-left: 20%;
+            border: solid;
+
+        }
     </style>
 
 </head>
@@ -585,32 +606,6 @@
                     }
                 }
             }
-            btnRun.onclick = function () {
-                var formData = new FormData(uploader)
-
-                if (formData.get('model') != null) {
-                    const xhr = new XMLHttpRequest()
-                    const parameter = 'model=' + formData.get('model')
-                    xhr.open('post', '/run')
-                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
-                    xhr.send(parameter)
-                    xhr.onload = function () {
-                        var result = JSON.parse(xhr.responseText)
-                        // console.log(result)
-                        if (result.massage === 'success') {
-                            alert('Run success, please select a file to see result')
-                        } else if (result.massage === 'error') {
-                            alert('Run failed, please wait for the file upload to complete and try again od see README.md to find countermeasures')
-                        } else if (result.massage === 'noData') {
-                            alert('No image uploaded')
-                        }
-
-                    }
-                }
-                else {
-                    alert('No model selected')
-                }
-            }
 
         </script>
 
@@ -797,6 +792,8 @@
     <script type="text/javascript">
         const btnRenew = document.getElementById('btnRenew')
         btnRenew.onclick = function () {
+            const wv = document.getElementById('workplace-vor')
+            wv.style.display = 'none'
             const xhr = new XMLHttpRequest()
             const idxValue = 'table'
             const labelValue = 'all'
@@ -882,6 +879,74 @@
 
         </div>
     </div>
+    <div id='workplace-vor' class="work-place" style="display: block; background-color: beige;text-align: center;">
+        <div class='runBar-outside'>
+            <div id='runBar' class="runBar" style="width: 0%;"></div>
+        </div>
+        <div id='runBar-number' class="bar-number" style="font-family: Aril;font-size:20px;">processing progress: 0%
+        </div>
+    </div>
+
+    <script type="text/javascript">
+
+        btnRun.onclick = function () {
+            const runBar = document.getElementById('runBar')
+            const runBarNumber = document.getElementById('runBar-number')
+            var timeIntervalID = window.setInterval(function () {
+                const xhr = new XMLHttpRequest()
+                const paramTime = 'todo=getProgress'
+                xhr.open('post', '/getProgress')
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+                xhr.send(paramTime)
+                xhr.onload = function () {
+                    var result = JSON.parse(xhr.responseText)
+                    // console.log(result)
+                    if (result.massage === 'success') {
+                        runBar.style.width = result.progress
+                        runBarNumber.innerHTML = 'processing progress: ' + result.progress
+                    } else {
+                        alert('Unable to get progress, please be patient or try again')
+                    }
+
+                }
+            }, [10000])
+
+            var formData = new FormData(uploader)
+            if (formData.get('model') != null) {
+                const xhr = new XMLHttpRequest()
+                const parameter = 'model=' + formData.get('model')
+                xhr.open('post', '/run')
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+                xhr.send(parameter)
+                xhr.onload = function () {
+                    window.clearInterval(timeIntervalID)
+                    const wv = document.getElementById('workplace-vor')
+                    wv.style.display = 'none'
+                    var result = JSON.parse(xhr.responseText)
+                    // console.log(result)
+                    if (result.massage === 'success') {
+                        alert('Run success, please select a file to see result')
+                    } else if (result.massage === 'error') {
+                        alert('Run failed, please wait for the file upload to complete and try again od see README.md to find countermeasures')
+                    } else if (result.massage === 'noData') {
+                        alert('No image uploaded')
+                    }
+
+                }
+            }
+            else {
+                alert('No model selected')
+            }
+        }
+
+        const kontroler = document.getElementById('runBar')
+
+        // if (kontroler.style.width == '100%') {
+        //     const wv = document.getElementById('workplace-vor')
+        //     wv.style.display = 'none'
+        // }
+    </script>
+
     <script type="text/javascript">
         var btnReturn = document.getElementById('return')
         var wp = document.getElementById('workplace')
@@ -1031,6 +1096,8 @@
         btnContinue.onclick = function () {
             var mg = confirm('The last unfinished task will be load')
             if (mg) {
+                const wv = document.getElementById('workplace-vor')
+                wv.style.display = 'none'
                 const xhr = new XMLHttpRequest()
                 const params = 'todo=continue'
                 xhr.open('post', '/continue')

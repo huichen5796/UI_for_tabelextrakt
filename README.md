@@ -25,6 +25,11 @@ It is planned that the _Ajax_ and _Javascript_ parts will be migrated to _Angula
 
 ## Webpage
 
+### Home
+![home](bild/home.jpg)
+
+### Main operation interface
+
 ![webpage](bild/webpage.jpg)
 
 ## Functions
@@ -56,6 +61,10 @@ This page integrates:
 - click **_RUN_**, wait until the message popup appears
 
 ![rundone](bild/rundone.jpg)
+
+- for file batch processing, the total processing progress can be known through the progress bar
+
+![bar](bild/progressbar.jpg)
 
 ### _Now all the processing results and data are saved in the database, let's view them._
 

@@ -149,7 +149,7 @@ def Run(line, model):
 def receivePara():
     msg = sys.argv[1]
     msg = eval(msg)
-    #msg ={"todo":"run","model":'densenet'}
+    # msg ={"todo":"getProgress"}
     if msg['todo'] == 'run':
         try:
             if os.path.getsize('assets\\uploads\\originalName.txt') == 0:
@@ -236,8 +236,11 @@ def receivePara():
             datas = list(msg['data'])
             with open('assets/uploads/originalName.txt', 'a+') as f:
                 for data in datas:
-                    f.write(str(data).replace(
-                        '\\', '/').replace('//', '/')+'\n')
+                    data = eval(str(data).replace(
+                        '\\', '/').replace('//', '/'))
+                    data['fileName'] = data['fileName'].split('/')[-1]
+                    
+                    f.write(str(data)+'\n')
             files = str([(data)['fileName'].split('/')[-1] for data in datas])
             print(json.dumps({'massage': 'success',
                               'files': files,
@@ -344,5 +347,22 @@ def receivePara():
             }
             print(json.dumps(res))
 
+    if msg['todo'] == 'getProgress':
+        try:
+            total = len(os.listdir('assets/uploads'))
+            
+            f = open('assets/imageShow/relation.txt', 'r')
+            done = len(f.readlines())
+            f.close()
+
+            progress = str(done*100//total) + '%'
+
+            res = {
+                'massage':'success',
+                'progress':progress
+            }
+            print(json.dumps(res))
+        except:
+            print(json.dumps({'massage':'error'}))
 
 receivePara()
