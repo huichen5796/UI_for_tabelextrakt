@@ -39,7 +39,9 @@ This page integrates:
 ### Upload and Process
 
 - Select the way to upload files in **_--upload image--_** of the **MENU**, the files will be stored in backend
+
 ![upload](bild/upload.jpg)
+
    - Button _An Image_ is used to upload a image
    - Button _Multi Images_ is used to upload more images, which are selected by **_Ctrl_**
    - Button _A Folder_ is used to upload a folder, in which are the images to be processed
@@ -50,6 +52,7 @@ This page integrates:
 - select a model, which shold be used for processing of images to detecte tables
 
 ![model](bild/model.jpg)
+
 - click **_RUN_**, wait until the message popup appears
 
 ![rundone](bild/rundone.jpg)
@@ -59,9 +62,11 @@ This page integrates:
 ### Visualization of table extraction results
 
 - select the image we want to visualize the result in **_MENU_** 
+
 ![result](bild/result.jpg)
 
 - click the button _SHOW_
+
 ![show](bild/show.jpg)
 
 - now is the result showing in the area
@@ -73,11 +78,15 @@ This page integrates:
 ![leftclik](bild/leftclick.gif)
 
 - now select the table name you want to view on top
+
 ![uniquid](bild/uniqueid.jpg)
+
 The table processing status will be displayed in the left and right areas
+
 ![lr](bild/showtable.jpg)
 
   Notice that the graph area on the left is now replaced with the table processing results, if you still want to view the original graph and table area, just click on the graph area on the left
+
   ![threeclick](bild/threeclick.gif)
 
 ### _Now we are done with the visualization, what if I want to view and save the results in elasticsearch?_ ###
@@ -121,6 +130,7 @@ Click the download link and the file will be downloaded to your browser's defaul
 - In the initial menu, you can:
 
 ![car2](bild/caref2.jpg)
+
   - choose to clear all data on the backend through the corresponding button 
   
      (Attention, not recoverable!)
