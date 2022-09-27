@@ -1,5 +1,3 @@
-import base64
-from email.mime import base
 import sys
 import json
 from functions import Search, TiltCorrection, SizeNormalize, PositionTable, GetTableZone, SaveTable, SaveExcel
@@ -12,7 +10,6 @@ from file_read_backwards import FileReadBackwards
 import torch.nn as nn
 import torchvision
 from elasticsearch import Elasticsearch
-from elasticsearch import helpers
 es = Elasticsearch()
 
 
@@ -155,24 +152,33 @@ def receivePara():
     #msg ={"todo":"run","model":'densenet'}
     if msg['todo'] == 'run':
         try:
-            model = msg['model']
-            with FileReadBackwards('assets\\uploads\\originalName.txt', encoding="utf-8") as fb: # deduplication of txt
-                fileName_list = []
-                for line in fb:
-                    try:
-                        # if re.search(msg['file'], line) != None:
-                        fileName = eval(line.split('\n')[0])['fileName'].split('/')[-1]
-                        if fileName not in fileName_list:
-                            fileName_list.append(fileName)
-                            Run(line, model)
-                    except:
-                        continue
+            if os.path.getsize('assets\\uploads\\originalName.txt') == 0:
+                res = {
+                    'massage': 'noData'
+                }
 
-            res = {
-                'massage': 'success'
-            }
-            fileName_list = []
-            print(json.dumps(res))
+                print(json.dumps(res))
+            else:
+                model = msg['model']
+                # deduplication of txt
+                with FileReadBackwards('assets\\uploads\\originalName.txt', encoding="utf-8") as fb:
+                    fileName_list = []
+                    for line in fb:
+                        try:
+                            # if re.search(msg['file'], line) != None:
+                            fileName = eval(line.split('\n')[0])[
+                                'fileName'].split('/')[-1]
+                            if fileName not in fileName_list:
+                                fileName_list.append(fileName)
+                                Run(line, model)
+                        except:
+                            continue
+
+                res = {
+                    'massage': 'success'
+                }
+                fileName_list = []
+                print(json.dumps(res))
 
         except:
             res = {
@@ -218,7 +224,8 @@ def receivePara():
     if msg['todo'] == 'upload':
         try:
             with open('assets/uploads/originalName.txt', 'a+') as f:
-                f.write(str(msg).replace('\\', '/').replace('//', '/').split('/assets')[-1]+'\n')
+                f.write(str(msg).replace('\\', '/').replace('//',
+                        '/').split('/assets')[-1]+'\n')
             print(json.dumps({'massage': 'success',
                               'fileName': '["'+msg['fileName']+'"]'}))
         except:
@@ -327,13 +334,13 @@ def receivePara():
             saveName = SaveExcel(tableId)
 
             res = {
-                'massage':'success',
-                'excelName':saveName
+                'massage': 'success',
+                'excelName': saveName
             }
             print(json.dumps(res))
         except:
             res = {
-                'massage':'error',
+                'massage': 'error',
             }
             print(json.dumps(res))
 

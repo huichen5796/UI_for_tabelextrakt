@@ -50,6 +50,33 @@
             padding-right: 30px;
         }
 
+        .button-run-hidden {
+            position: fixed;
+            width: 97px;
+            height: 27px;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 0px;
+            font-size: 13px;
+            font-family: Arial;
+            color: transparent;
+            font-weight: bold;
+            margin-top: 10px;
+            background: transparent;
+            -webkit-transition-duration: 0.4s;
+            transition-duration: 0.4s;
+            text-align: center;
+            border: 2px solid red;
+            border-color: transparent;
+            border-radius: 5px;
+        }
+
+        .button-run-hidden:hover {
+            background-color: red;
+            color: white;
+        }
+
         .menu-button {
             width: 100px;
             height: 30px;
@@ -60,7 +87,6 @@
             font-size: 16px;
             font-family: Arial;
             font-weight: bold;
-            border-radius: 25px;
             margin-top: 10px;
             -webkit-transition-duration: 0.4s;
             transition-duration: 0.4s;
@@ -301,9 +327,11 @@
 
             <div class="menu-item">--model to use--</div>
             <div class="menu-opt">
-                <input type="checkbox" name='model' id="model" value="densenet">densenet
-                <input type="checkbox" name='model' id="model" value="unet">unet<br>
+                <input type="radio" name='model' id="model" value="densenet">densenet
+                <input type="radio" name='model' id="model" value="unet">unet<br>
+                <div type="button" id="btnRunHidden" class="button-run-hidden">PLEASE WAIT</div>
                 <input type="button" value="RUN" id="btnRun" class="menu-button">
+
             </div>
         </form>
         <div>
@@ -326,6 +354,9 @@
             const MultiUp = document.getElementById('xMulti')
 
             MultiUp.onchange = function () {
+                const btnRunHidden = document.getElementById('btnRunHidden')
+                btnRunHidden.style.display = 'block'
+
                 const xhr = new XMLHttpRequest()
                 var f = new FormData()
                 for (i = 0; i < (this.files).length; i++) {
@@ -366,14 +397,19 @@
                             }
                         }
                         alert('files upload success')
+                        btnRunHidden.style.display = 'none'
                     } else {
                         alert('Backend error of upload')
+                        btnRunHidden.style.display = 'none'
                     }
                 }
 
             }
 
             folderUp.onchange = function () {
+                const btnRunHidden = document.getElementById('btnRunHidden')
+                btnRunHidden.style.display = 'block'
+
                 const xhr = new XMLHttpRequest()
                 var f = new FormData()
                 for (i = 0; i < (this.files).length; i++) {
@@ -414,14 +450,19 @@
                             }
                         }
                         alert('files upload success')
+                        btnRunHidden.style.display = 'none'
                     } else {
                         alert('Backend error of upload')
+                        btnRunHidden.style.display = 'none'
                     }
                 }
 
             }
 
             fileUp.onchange = function () {
+                const btnRunHidden = document.getElementById('btnRunHidden')
+                btnRunHidden.style.display = 'block'
+
                 const xhr = new XMLHttpRequest()
                 var f = new FormData()
                 f.append('attrName', this.files[0])
@@ -459,8 +500,10 @@
                             }
                         }
                         alert('files upload success')
+                        btnRunHidden.style.display = 'none'
                     } else {
                         alert('Backend error of upload')
+                        btnRunHidden.style.display = 'none'
                     }
                 }
             }
@@ -553,11 +596,12 @@
                     xhr.send(parameter)
                     xhr.onload = function () {
                         var result = JSON.parse(xhr.responseText)
+                        // console.log(result)
                         if (result.massage === 'success') {
                             alert('Run success, please select a file to see result')
                         } else if (result.massage === 'error') {
                             alert('Run failed, please wait for the file upload to complete and try again od see README.md to find countermeasures')
-                        } else if (result.massage === 'notFound') {
+                        } else if (result.massage === 'noData') {
                             alert('No image uploaded')
                         }
 
