@@ -101,7 +101,7 @@ The menu should now be updated.
 
 ![rutrn](bild/return.jpg)
 
-- lease click the load button first to load the tables stored in _Elasticsearch_
+- please click the load button first to load the tables stored in _Elasticsearch_
 
 ![initload](bild/inintload.jpg)
 
