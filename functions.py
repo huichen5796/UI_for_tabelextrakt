@@ -1587,7 +1587,7 @@ def SaveExcel(tableId):
             table.append(result['_source'])
         df = pd.DataFrame(table)
         # df.index.name = label
-        df.to_excel(writer, sheet_name=label)
+        df.to_excel(writer, sheet_name=label[0:30])
 
     writer.save()
 

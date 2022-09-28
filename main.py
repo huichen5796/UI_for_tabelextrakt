@@ -149,7 +149,7 @@ def Run(line, model):
 def receivePara():
     msg = sys.argv[1]
     msg = eval(msg)
-    # msg ={"todo":"getProgress"}
+    #msg ={ 'todo': 'continueRun'}
     if msg['todo'] == 'run':
         try:
             if os.path.getsize('assets\\uploads\\originalName.txt') == 0:
@@ -239,7 +239,7 @@ def receivePara():
                     data = eval(str(data).replace(
                         '\\', '/').replace('//', '/'))
                     data['fileName'] = data['fileName'].split('/')[-1]
-                    
+
                     f.write(str(data)+'\n')
             files = str([(data)['fileName'].split('/')[-1] for data in datas])
             print(json.dumps({'massage': 'success',
@@ -315,17 +315,71 @@ def receivePara():
             file_list = []
             with open('assets/uploads/originalName.txt', 'r') as f:
                 for line in f:
-                    file_list.append(eval(line)['fileName'])
-                file_list = list(set(file_list))
-                if len(file_list) != 0:
-                    print(json.dumps({
-                        'massage': 'success',
-                        'fileName': file_list
-                    }))
-                else:
-                    print(json.dumps({
-                        'massage': 'error',
-                    }))
+                    file_list.append(eval(line.split('\n')[0])['fileName'])
+            file_list = list(set(file_list))
+
+            total = len(file_list)
+
+            f = open('assets/imageShow/relation.txt', 'r')
+            done_list = [eval(do.split('\n')[0])['file']
+                         for do in f.readlines()]
+            done_list = list(set(done_list))
+            done = len(done_list)
+            f.close()
+
+            progress = str(done*100//total) + '%'
+
+            if len(file_list) != 0:
+                print(json.dumps({
+                    'massage': 'success',
+                    'fileName': file_list,
+                    'progress': progress,
+
+                }))
+            else:
+                print(json.dumps({
+                    'massage': 'error',
+                }))
+        except:
+            print(json.dumps({'massage': 'error', }))
+
+    if msg['todo'] == 'continueRun':
+        try:
+            file_list = []
+            with open('assets/uploads/originalName.txt', 'r') as f:
+                for line in f:
+                    file_list.append(eval(line.split('\n')[0])['fileName'])
+            file_list = list(set(file_list))
+
+            total = len(file_list)
+
+            f = open('assets/imageShow/relation.txt', 'r')
+            done_list = [eval(do.split('\n')[0])['file']
+                         for do in f.readlines()]
+            done_list = list(set(done_list))
+            done = len(done_list)
+            f.close()
+
+            progress = str(done*100//total) + '%'
+
+            todo_list = [todo for todo in file_list if todo not in done_list]
+            todo_list = list(set(todo_list))
+            # print(todo_list)
+            model = 'densenet'
+            # deduplication of txt
+            # print(todo_list)
+            for todo in todo_list:
+
+                try:
+                    with FileReadBackwards('assets\\uploads\\originalName.txt', encoding="utf-8") as fb:
+                        for line in fb:
+                            if eval(line.split('\n')[0])['fileName'].split('/')[-1] == todo:
+                                # print(todo)
+                                Run(line, model)
+                except:
+                    continue
+
+            print(json.dumps({'massage': 'success',}))
         except:
             print(json.dumps({'massage': 'error', }))
 
@@ -350,7 +404,7 @@ def receivePara():
     if msg['todo'] == 'getProgress':
         try:
             total = len(os.listdir('assets/uploads'))
-            
+
             f = open('assets/imageShow/relation.txt', 'r')
             done = len(f.readlines())
             f.close()
@@ -358,11 +412,12 @@ def receivePara():
             progress = str(done*100//total) + '%'
 
             res = {
-                'massage':'success',
-                'progress':progress
+                'massage': 'success',
+                'progress': progress
             }
             print(json.dumps(res))
         except:
-            print(json.dumps({'massage':'error'}))
+            print(json.dumps({'massage': 'error'}))
+
 
 receivePara()

@@ -284,3 +284,28 @@ exports.getProgress = (req, res) => {
 
     })
 }
+
+exports.continueRun = (req,res)=>{
+    const body = req.body
+    const conRun = {
+        todo: body.todo,
+    }
+    console.log(conRun)
+    const conRunStr = JSON.stringify(conRun)
+    const py = spawn('python', ['main.py', conRunStr])
+
+    /* Output the print content in the py file */
+    py.stdout.on('data', function (result) {
+        const data = JSON.parse(result.toString())
+        if (data.massage === 'success') {
+            // console.log(data)
+            res.send(data)
+            console.log('success ' + "todo: 'continueRun'")
+        }
+        else {
+            res.send(data)
+            console.log('error ' + "todo: 'continueRun'")
+        }
+
+    })
+}

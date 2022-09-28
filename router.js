@@ -22,4 +22,5 @@ router.post('/saveExcel', router_handler.saveExcel)
 
 router.post('/getProgress', router_handler.getProgress)
 
+router.post('/continueRun', router_handler.continueRun)
 module.exports = router;
