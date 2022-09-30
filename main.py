@@ -149,8 +149,8 @@ def Run(line, model):
 def receivePara():
     msg = sys.argv[1]
     msg = eval(msg)
-    #msg ={ 'todo': 'continueRun'}
-    if msg['todo'] == 'run':
+    #msg ={ 'todo': 'cleanAll'}
+    if msg['todo'] == 'run': # The pictures recorded in the txt file ('assets\uploads\originalName.txt') are processed with the function ('Run()') in turn to extract the tables
         try:
             if os.path.getsize('assets\\uploads\\originalName.txt') == 0:
                 res = {
@@ -186,7 +186,7 @@ def receivePara():
             }
             print(json.dumps(res))
 
-    if msg['todo'] == 'search':
+    if msg['todo'] == 'search': # Search table data by uniqueID and output table data as JSON {'':'','':'',..}
         try:
             results = Search(msg['idx'], msg['label'])
             results = json.loads(results)['hits']['hits']
@@ -207,7 +207,7 @@ def receivePara():
                 'massage': 'error',
             }))
 
-    if msg['todo'] == 'searchLabel':
+    if msg['todo'] == 'searchLabel': # Search the database for all table uniqueID and output the uniqueIDs as LIST ['','','',..]
 
         try:
             uniqueId_list = []
@@ -221,7 +221,7 @@ def receivePara():
         except:
             print('["error"]')
 
-    if msg['todo'] == 'upload':
+    if msg['todo'] == 'upload': # Write the correspondence between the binary file name and the original image name into the txt file ('assets\uploads\originalName.txt'), output JSON
         try:
             with open('assets/uploads/originalName.txt', 'a+') as f:
                 f.write(str(msg).replace('\\', '/').replace('//',
@@ -231,7 +231,7 @@ def receivePara():
         except:
             print(json.dumps({'massage': 'error', }))
 
-    if msg['todo'] == 'uploadStapel':
+    if msg['todo'] == 'uploadStapel': # see oben
         try:
             datas = list(msg['data'])
             with open('assets/uploads/originalName.txt', 'a+') as f:
@@ -248,7 +248,7 @@ def receivePara():
         except:
             print(json.dumps({'massage': 'error', }))
 
-    if msg['todo'] == 'seeDetail':
+    if msg['todo'] == 'seeDetail': # Get the corresponding image processing results according to the records in the txt file ('assets\imageShow\relation.txt'), output JSON
         try:
             f = open('assets/uploads/originalName.txt', 'r')
             path_list = []
@@ -278,7 +278,7 @@ def receivePara():
         except:
             print(json.dumps({'massage': "error"}))
 
-    if msg['todo'] == 'cleanAll':
+    if msg['todo'] == 'cleanAll': # output JSON
         try:
             for file in os.listdir('assets/uploads'):
                 file = os.path.join('assets/uploads', file)
@@ -301,7 +301,7 @@ def receivePara():
         except:
             print(json.dumps({'massage': 'error'}))
 
-    if msg['todo'] == 'cleanEla':
+    if msg['todo'] == 'cleanEla': # output JSON
         try:
             # deletes whole index
             es.indices.delete(index='table', ignore=[400, 404])
@@ -310,7 +310,7 @@ def receivePara():
         except:
             print(json.dumps({'massage': 'error'}))
 
-    if msg['todo'] == 'continue':
+    if msg['todo'] == 'continue': # Get processing progress and all image names, output JSON
         try:
             file_list = []
             with open('assets/uploads/originalName.txt', 'r') as f:
@@ -343,7 +343,7 @@ def receivePara():
         except:
             print(json.dumps({'massage': 'error', }))
 
-    if msg['todo'] == 'continueRun':
+    if msg['todo'] == 'continueRun': # Continue processing unprocessed images, output JSON
         try:
             file_list = []
             with open('assets/uploads/originalName.txt', 'r') as f:
@@ -383,7 +383,7 @@ def receivePara():
         except:
             print(json.dumps({'massage': 'error', }))
 
-    if msg['todo'] == 'saveExcel':
+    if msg['todo'] == 'saveExcel': # output JSON
         try:
 
             tableId = msg['tableId']
@@ -401,7 +401,7 @@ def receivePara():
             }
             print(json.dumps(res))
 
-    if msg['todo'] == 'getProgress':
+    if msg['todo'] == 'getProgress': # Get processing progress
         try:
             total = len(os.listdir('assets/uploads'))
 

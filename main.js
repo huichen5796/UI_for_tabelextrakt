@@ -1,4 +1,5 @@
 const express = require('express');    /*ähnlich wie import in Python*/
+const path = require('path')
 const hostname = '127.0.0.1'
 const port = 3000;
 const router = require('./router.js')
@@ -16,7 +17,8 @@ app.use(router)
 
 /* Generieren eine anfängliche statische Seite */
 app.get('/', (req, res) => {
-  res.sendFile("D:/batch_drawing/assets/web.html");
+  
+  res.sendFile(path.join(__dirname, 'assets', 'web.html'));
 });
 
 app.use(function (err, req, res, next) {

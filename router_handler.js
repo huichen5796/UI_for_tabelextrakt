@@ -110,7 +110,7 @@ exports.runPy = (req, res) => {
     })
 }
 
-exports.returnSearch = (req, res) => {
+exports.search = (req, res) => {
     const body = req.body
     const search = {
         'todo': 'search',

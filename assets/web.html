@@ -210,9 +210,9 @@
             right: 0;
             margin: auto;
             font-size: 10px;
-            padding:5px;
+            padding: 5px;
             text-align: center;
-            
+
         }
 
         th {
@@ -335,8 +335,9 @@
             border: none;
             background-color: transparent;
             font-size: 40px;
-            color: black;
+            color: whitesmoke;
             display: none;
+            font-weight: bold;
 
         }
     </style>
@@ -347,17 +348,21 @@
     <div style="height: 20px; width: 50%;"></div>
     <div class="title">Automatische Erkennung und Konvertierung <br>von Tabellen in Bilddokumenten</div>
     <div class="label"><img src="label.jpg" width="50px" height="50px" /></div>
+
     <div id='menu-box' class="menu-box" style="display: block;">
 
         <form id="uploader" enctype="multipart/form-data">
             <div class="menu-title">MENU</div>
             <div class="menu-item">--upload image--</div>
-            <label class="menu-up" for="xFile">&nbsp;An Image&nbsp;</label><label>&nbsp;</label><label class="menu-up"
-                for="xMulti">&nbsp;Multi Images&nbsp;</label>
-            <label>&nbsp;</label><label class="menu-up" for="xFolder">&nbsp;A Folder&nbsp;</label>
+
+            <label class="menu-up" for="xFile">&nbsp;An Image&nbsp;</label>
+            <label class="menu-up" for="xMulti">&nbsp;Multi Images&nbsp;</label>
+            <label class="menu-up" for="xFolder">&nbsp;A Folder&nbsp;</label>
+
             <input type="file" name='xFile' id='xFile' style="position:absolute;clip:rect(0 0 0 0)">
             <input type="file" name='xMulti' id='xMulti' style="position:absolute;clip:rect(0 0 0 0)" multiple>
             <input type="file" name='xFolder' id='xFolder' style="position:absolute;clip:rect(0 0 0 0)" webkitdirectory>
+
             <div class="progress">
                 <div id='bar' class="progress-bar" style="width:0%;"></div>
             </div>
@@ -367,11 +372,11 @@
             <div class="menu-opt">
                 <input type="radio" name='model' id="model" value="densenet">densenet
                 <input type="radio" name='model' id="model" value="unet">unet<br>
-                <div type="button" id="btnRunHidden" class="button-run-hidden">PLEASE WAIT</div>
+                <div id="btnRunHidden" class="button-run-hidden">PLEASE WAIT</div>
                 <input type="button" value="RUN" id="btnRun" class="menu-button">
-
             </div>
         </form>
+
         <div>
             <div class="menu-item">--results visualization--</div>
             <div class="menu-opt">
@@ -382,249 +387,6 @@
                 <input type="button" value="SHOW" id="btnShow" class="menu-button">
             </div>
         </div>
-        <script type="text/javascript">
-            const btnRun = document.getElementById('btnRun')
-            const uploader = document.getElementById('uploader')
-            const fileUp = document.getElementById('xFile')
-            const imageSearch = document.getElementById('image')
-            const btnShow = document.getElementById('btnShow')
-            const folderUp = document.getElementById('xFolder')
-            const MultiUp = document.getElementById('xMulti')
-
-            MultiUp.onchange = function () {
-                const btnRunHidden = document.getElementById('btnRunHidden')
-                btnRunHidden.style.display = 'block'
-
-                const xhr = new XMLHttpRequest()
-                var f = new FormData()
-                for (i = 0; i < (this.files).length; i++) {
-                    f.append('attrName' + String(i), this.files[i])
-                    xhr.open('post', '/uploadStapel')
-
-                    xhr.upload.onprogress = function (ev) {
-                        var result = (ev.loaded / ev.total) * 100 + '%'
-                        var bar = document.getElementById('bar')
-                        var barNumber = document.getElementById('bar-number')
-                        bar.style.width = result
-                        barNumber.innerHTML = result
-                    }
-                }
-                xhr.send(f)
-
-                xhr.onload = function () {
-                    var result = JSON.parse(xhr.responseText)
-                    if (result.massage === 'success') {
-                        // console.log(result.files)
-                        var label_list = eval(result.files)
-                        // console.log(label_list)
-
-                        var label_oldoptions = document.getElementById('image').options
-                        var label_old = []
-                        for (let i = 0; i < label_oldoptions.length; i++) {
-                            label_old.push(label_oldoptions[i].value)
-                        }
-                        // console.log(label_old)
-                        for (let i = 0; i < label_list.length; i++) {
-                            if (label_old.indexOf(label_list[i]) === -1) {
-                                var label_new = label_list[i]
-                                var board = document.getElementById("image");
-                                var e = document.createElement("option");
-                                e.value = label_new
-                                e.text = label_new
-                                var object = board.appendChild(e);
-                            }
-                        }
-                        alert('files upload success')
-                        btnRunHidden.style.display = 'none'
-                    } else {
-                        alert('Backend error of upload')
-                        btnRunHidden.style.display = 'none'
-                    }
-                }
-
-            }
-
-            folderUp.onchange = function () {
-                const btnRunHidden = document.getElementById('btnRunHidden')
-                btnRunHidden.style.display = 'block'
-
-                const xhr = new XMLHttpRequest()
-                var f = new FormData()
-                for (i = 0; i < (this.files).length; i++) {
-
-                    f.append('attrName' + String(i), this.files[i])
-                    xhr.open('post', '/uploadStapel')
-
-                    xhr.upload.onprogress = function (ev) {
-                        var result = (ev.loaded / ev.total) * 100 + '%'
-                        var bar = document.getElementById('bar')
-                        var barNumber = document.getElementById('bar-number')
-                        bar.style.width = result
-                        barNumber.innerHTML = result
-                    }
-                }
-                xhr.send(f)
-                xhr.onload = function () {
-                    var result = JSON.parse(xhr.responseText)
-                    if (result.massage === 'success') {
-                        // console.log(result.files)
-                        var label_list = eval(result.files)
-                        // console.log(label_list)
-
-                        var label_oldoptions = document.getElementById('image').options
-                        var label_old = []
-                        for (let i = 0; i < label_oldoptions.length; i++) {
-                            label_old.push(label_oldoptions[i].value)
-                        }
-                        // console.log(label_old)
-                        for (let i = 0; i < label_list.length; i++) {
-                            if (label_old.indexOf(label_list[i]) === -1) {
-                                var label_new = label_list[i]
-                                var board = document.getElementById("image");
-                                var e = document.createElement("option");
-                                e.value = label_new
-                                e.text = label_new
-                                var object = board.appendChild(e);
-                            }
-                        }
-                        alert('files upload success')
-                        btnRunHidden.style.display = 'none'
-                    } else {
-                        alert('Backend error of upload')
-                        btnRunHidden.style.display = 'none'
-                    }
-                }
-
-            }
-
-            fileUp.onchange = function () {
-                const btnRunHidden = document.getElementById('btnRunHidden')
-                btnRunHidden.style.display = 'block'
-
-                const xhr = new XMLHttpRequest()
-                var f = new FormData()
-                f.append('attrName', this.files[0])
-                xhr.open('post', '/upload')
-
-                xhr.upload.onprogress = function (ev) {
-                    var result = (ev.loaded / ev.total) * 100 + '%'
-                    var bar = document.getElementById('bar')
-                    var barNumber = document.getElementById('bar-number')
-                    bar.style.width = result
-                    barNumber.innerHTML = result
-                }
-
-                xhr.send(f)
-
-                xhr.onload = function () {
-                    var result = JSON.parse(xhr.responseText)
-                    if (result.massage === 'success') {
-                        var label_list = eval(result.fileName)
-
-                        var label_oldoptions = document.getElementById('image').options
-                        var label_old = []
-                        for (let i = 0; i < label_oldoptions.length; i++) {
-                            label_old.push(label_oldoptions[i].value)
-                        }
-                        // console.log(label_old)
-                        for (let i = 0; i < label_list.length; i++) {
-                            if (label_old.indexOf(label_list[i]) === -1) {
-                                var label_new = label_list[i]
-                                var board = document.getElementById("image");
-                                var e = document.createElement("option");
-                                e.value = label_new
-                                e.text = label_new
-                                var object = board.appendChild(e);
-                            }
-                        }
-                        alert('files upload success')
-                        btnRunHidden.style.display = 'none'
-                    } else {
-                        alert('Backend error of upload')
-                        btnRunHidden.style.display = 'none'
-                    }
-                }
-            }
-
-            btnShow.onclick = function () {
-
-                const imageValue = imageSearch.value
-                if (imageValue === '--none--') {
-                    alert('Please select a file to see the result')
-                }
-                else {
-                    const xhr = new XMLHttpRequest()
-                    const params = 'image=' + imageValue
-                    xhr.open('post', '/seeDetail')
-                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
-                    xhr.send(params)
-
-                    xhr.onload = function () {
-                        var result = JSON.parse(xhr.responseText)
-                        var resultKeys = Object.keys(result)
-                        if (result.massage === 'success') {
-                            var imgo = document.createElement('img')
-                            // var i = new Image()
-                            // var naturalWidth, naturalHeight
-                            imgo.src = result.path
-                            // console.log(imgo.src)
-                            imgo.onload = function () {
-
-                                imgo.className = 'image'
-                                var wp_left = document.getElementById('wp-left')
-                                var child = wp_left.lastElementChild
-                                while (child) {
-                                    wp_left.removeChild(child)
-                                    child = wp_left.lastElementChild
-                                }
-                                wp_left.appendChild(imgo)
-                            }
-                            var tableSelect = document.getElementById('tableSelect')
-                            var child = tableSelect.lastElementChild
-                            while (child) {
-                                tableSelect.removeChild(child)
-                                child = tableSelect.lastElementChild
-                            }
-                            e_none = document.createElement('option')
-                            e_none.value = "--none--"
-                            e_none.text = '--none--'
-                            tableSelect.appendChild(e_none)
-
-                            for (i = 3; i < resultKeys.length; i++) {
-                                var e = document.createElement("option");
-                                var n = resultKeys[i]
-                                // console.log(n)
-                                // console.log((result[n]))
-                                // console.log((result[n]).split("/"))
-                                e.value = (result[n]).split('imageShow/')[1]
-                                e.text = (result[n]).split('imageShow/')[1]
-                                tableSelect.appendChild(e)
-                            }
-
-                            var img = document.createElement('img')
-                            // var i = new Image()
-                            // var naturalWidth, naturalHeight
-                            img.src = 'imageShow/table_of_' + result.fileName
-                            // console.log(img.src)
-                            img.onload = function () {
-                                img.className = 'image'
-                                var wp_left_hind = document.getElementById('wp-left-hind')
-                                var child = wp_left_hind.lastElementChild
-                                while (child) {
-                                    wp_left_hind.removeChild(child)
-                                    child = wp_left_hind.lastElementChild
-                                }
-                                wp_left_hind.appendChild(img)
-                            }
-                        } else {
-                            alert('No data found!! Please make sure the program has finished running')
-                        }
-
-                    }
-                }
-            }
-
-        </script>
 
         <div class="menu-item">--other functions--</div>
         <input type="button" id='turn' value="ELASTICSEARCH" class="menu-button" style="width: 250px;">
@@ -633,37 +395,12 @@
         <input type="button" value="Continue the interrupted work" id="continue" class="menu-button-warn">
 
     </div>
-    <script type="text/javascript">
-        const btnCleanAll = document.getElementById('cleanAll')
-        btnCleanAll.onclick = function () {
-            var ms = confirm('This will clear all data on the backend, do you choose to continue?')
-            if (ms) {
-                const xhr = new XMLHttpRequest()
-                const params = 'todo=cleanAll'
-                xhr.open('post', '/clean')
-                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
-                xhr.send(params)
-
-                xhr.onload = function () {
-                    var result = JSON.parse(xhr.responseText)
-                    if (result.massage === 'success') {
-                        alert('Backend has been initialized')
-                    } else {
-                        alert('Data clear failed')
-                    }
-                }
-            }
-            else {
-                alert('Data keeping')
-            }
-        }
-
-    </script>
-
 
     <div id='menu-box-hind' class="menu-box" style="display: none;">
+
         <div class="menu-title">MENU</div>
         <input type="button" id='return' value="RETURN TO VISUALIZATION" class="menu-button" style="width: 250px;">
+
         <div class="menu-item">--load database--</div>
         <div class="menu-opt">
             select a index:
@@ -671,7 +408,8 @@
                 <option value="table" selected>table</option>
             </select>
         </div>
-        <input type="button" value="LOAD" id="btnRenew" class="menu-button">
+        <input type="button" value="LOAD" id="btnLOAD" class="menu-button">
+
         <div class="menu-item">--select uniqueID--</div>
         <div class="menu-opt">
             select a table:
@@ -680,6 +418,7 @@
             </select>
         </div>
         <input type="button" value="SHOW" id="btnShowTable" class="menu-button">
+
         <div class="menu-item">--save as Excel--</div>
         <div class="menu-opt" id="excel">
             select a table:
@@ -692,78 +431,413 @@
 
         <div class="menu-item">Please choose carefully:</div>
         <input type="button" value="Clear all data in the Elasticsearch" id="cleanEla" class="menu-button-warn">
-    </div>
-    <script type="text/javascript">
-        const btnSaveExcel = document.getElementById('saveExcel')
-        btnSaveExcel.onclick = function () {
-            const tableId = document.getElementById('selectExcel')
-            if (tableId.value === '--none--') {
-                alert('Please load database at first')
-            }
-            else {
-                const xhr = new XMLHttpRequest()
-                const params = 'todo=saveExcel' + '&tableId=' + tableId.value
-                // console.log(tableId.value)
-                // console.log(params)
-                xhr.open('post', '/saveExcel')
-                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
-                xhr.send(params)
 
-                xhr.onload = function () {
-                    var result = JSON.parse(xhr.responseText)
-                    if (result.massage === 'success') {
-                        const down = document.getElementById('download')
-                        const dd = document.getElementById('dd')
-                        dd.style.display = 'block'
-                        down.href = 'http://127.0.0.1:3000/excelStore/' + result.excelName
-                        // console.log(down.href)
-                        down.download = result.excelName
-                        down.text = result.excelName
-                        alert('save Excel success')
-                    } else {
-                        alert('failed to save Excel')
+    </div>
+
+    <div id="workplace-for-ela" class="work-place" style="display:none">
+        <div id='tableZone' class="tableZone"></div>
+    </div>
+
+    <div id='workplace' class="work-place" style="display: block">
+
+        <div class="table-select">
+            Click on image to view table area<br>
+            Select the table of the image to see the details:
+            <select id="tableSelect">
+                <option value="--none--" selected>--none--</option>
+            </select>
+        </div>
+
+        <input type="button" id="hiddenB" class="hidden-button">
+        <div id='wp-left' class="wp-left" style="display:block"></div>
+        <div id="wp-left-hind" class="wp-left" style="display:none"></div>
+        <div id="wp-left-hind2" class="wp-left" style="display:none"></div>
+        <div id='wp-right' class="wp-right"></div>
+
+    </div>
+
+    <div id='workplace-vor' class="work-place" style="display: block; background-color: beige;text-align: center;">
+        <div class='runBar-outside'>
+            <div id='runBar' class="runBar" style="width: 0%;"></div>
+        </div>
+        <div id='runBar-number' class="bar-number" style="font-family: Aril;font-size:20px;">processing progress: 0%
+        </div>
+    </div>
+
+    <div id='workplace-vor2' class="work-place" style="display: none; background-color: beige;text-align: center;">
+        <div class='runBar-outside'>
+            <div id='runBar2' class="runBar" style="width: 100%;"></div>
+        </div>
+        <div id='runBar-number2' class="bar-number" style="font-family: Aril;font-size:20px;">processing progress: 100%
+        </div>
+    </div>
+    <input type="button" id="runEnd" class='runEndButton' value="Run success, click to continue
+    ">
+
+    <script type="text/javascript"> // here is the code block for the function of image uploading
+        // The uploaded filename will be loaded into the dropdown list in the visualization bar
+        // The correspondence between the original file name and the downloaded binary file name will be recorded in the txt file ('assets/uploads/originalName.txt')
+        const btnRun = document.getElementById('btnRun')
+        const uploader = document.getElementById('uploader')
+        const fileUp = document.getElementById('xFile')
+        const imageSearch = document.getElementById('image')
+        const btnShow = document.getElementById('btnShow')
+        const folderUp = document.getElementById('xFolder')
+        const MultiUp = document.getElementById('xMulti')
+
+        fileUp.onchange = function () {
+            const btnRunHidden = document.getElementById('btnRunHidden')
+            btnRunHidden.style.display = 'block'
+            const xhr = new XMLHttpRequest()
+            var f = new FormData()
+            f.append('attrName', this.files[0])
+            xhr.open('post', '/upload')
+
+            xhr.upload.onprogress = function (ev) {
+                var result = (ev.loaded / ev.total) * 100 + '%'
+                var bar = document.getElementById('bar')
+                var barNumber = document.getElementById('bar-number')
+                bar.style.width = result
+                barNumber.innerHTML = result
+            }
+
+            xhr.send(f)
+            xhr.onload = function () {
+                var result = JSON.parse(xhr.responseText)
+                if (result.massage === 'success') {
+                    var label_list = eval(result.fileName)
+
+                    var label_oldoptions = document.getElementById('image').options
+                    var label_old = []
+                    for (let i = 0; i < label_oldoptions.length; i++) {
+                        label_old.push(label_oldoptions[i].value)
                     }
+                    // console.log(label_old)
+                    for (let i = 0; i < label_list.length; i++) {
+                        if (label_old.indexOf(label_list[i]) === -1) {
+                            var label_new = label_list[i]
+                            var board = document.getElementById("image");
+                            var e = document.createElement("option");
+                            e.value = label_new
+                            e.text = label_new
+                            var object = board.appendChild(e);
+                        }
+                    }
+                    alert('files upload success')
+                    btnRunHidden.style.display = 'none'
+                } else {
+                    alert('Backend error of upload')
+                    btnRunHidden.style.display = 'none'
                 }
             }
         }
 
+        MultiUp.onchange = function () {
+            const btnRunHidden = document.getElementById('btnRunHidden')
+            btnRunHidden.style.display = 'block'
 
-        const btnCleanEla = document.getElementById('cleanEla')
-        btnCleanEla.onclick = function () {
-            var ms = confirm('This will clear all data on the elasticsearch unter index "table", do you choose to continue?')
-            if (ms) {
-                const xhr = new XMLHttpRequest()
-                const params = 'todo=cleanEla'
-                xhr.open('post', '/clean')
-                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
-                xhr.send(params)
+            const xhr = new XMLHttpRequest()
+            var f = new FormData()
+            for (i = 0; i < (this.files).length; i++) {
+                f.append('attrName' + String(i), this.files[i])
+                xhr.open('post', '/uploadStapel')
 
-                xhr.onload = function () {
-                    var result = JSON.parse(xhr.responseText)
-                    if (result.massage === 'success') {
-                        alert('data of index "table" has been cleand')
-                    } else {
-                        alert('Data clear failed')
-                    }
+                xhr.upload.onprogress = function (ev) {
+                    var result = (ev.loaded / ev.total) * 100 + '%'
+                    var bar = document.getElementById('bar')
+                    var barNumber = document.getElementById('bar-number')
+                    bar.style.width = result
+                    barNumber.innerHTML = result
                 }
             }
-            else {
-                alert('Data keeping')
+
+            xhr.send(f)
+            xhr.onload = function () {
+                var result = JSON.parse(xhr.responseText)
+                if (result.massage === 'success') {
+                    // console.log(result.files)
+                    var label_list = eval(result.files)
+                    // console.log(label_list)
+
+                    var label_oldoptions = document.getElementById('image').options
+                    var label_old = []
+                    for (let i = 0; i < label_oldoptions.length; i++) {
+                        label_old.push(label_oldoptions[i].value)
+                    }
+                    // console.log(label_old)
+                    for (let i = 0; i < label_list.length; i++) {
+                        if (label_old.indexOf(label_list[i]) === -1) {
+                            var label_new = label_list[i]
+                            var board = document.getElementById("image");
+                            var e = document.createElement("option");
+                            e.value = label_new
+                            e.text = label_new
+                            var object = board.appendChild(e);
+                        }
+                    }
+                    alert('files upload success')
+                    btnRunHidden.style.display = 'none'
+                } else {
+                    alert('Backend error of upload')
+                    btnRunHidden.style.display = 'none'
+                }
+            }
+        }
+
+        folderUp.onchange = function () {
+            const btnRunHidden = document.getElementById('btnRunHidden')
+            btnRunHidden.style.display = 'block'
+
+            const xhr = new XMLHttpRequest()
+            var f = new FormData()
+            for (i = 0; i < (this.files).length; i++) {
+
+                f.append('attrName' + String(i), this.files[i])
+                xhr.open('post', '/uploadStapel')
+
+                xhr.upload.onprogress = function (ev) {
+                    var result = (ev.loaded / ev.total) * 100 + '%'
+                    var bar = document.getElementById('bar')
+                    var barNumber = document.getElementById('bar-number')
+                    bar.style.width = result
+                    barNumber.innerHTML = result
+                }
+            }
+
+            xhr.send(f)
+            xhr.onload = function () {
+                var result = JSON.parse(xhr.responseText)
+                if (result.massage === 'success') {
+                    // console.log(result.files)
+                    var label_list = eval(result.files)
+                    // console.log(label_list)
+
+                    var label_oldoptions = document.getElementById('image').options
+                    var label_old = []
+                    for (let i = 0; i < label_oldoptions.length; i++) {
+                        label_old.push(label_oldoptions[i].value)
+                    }
+                    // console.log(label_old)
+                    for (let i = 0; i < label_list.length; i++) {
+                        if (label_old.indexOf(label_list[i]) === -1) {
+                            var label_new = label_list[i]
+                            var board = document.getElementById("image");
+                            var e = document.createElement("option");
+                            e.value = label_new
+                            e.text = label_new
+                            var object = board.appendChild(e);
+                        }
+                    }
+                    alert('files upload success')
+                    btnRunHidden.style.display = 'none'
+                } else {
+                    alert('Backend error of upload')
+                    btnRunHidden.style.display = 'none'
+                }
             }
         }
     </script>
 
+    <script type="text/javascript"> // here is the code block for the function of button 'RUN'
+        // The table extraction process will be performed on all files recorded in the txt file ('asset/uploads/originalName.txt')
+        // The result of the processing will be saved in the txt file ('assets/imageShow/relation.txt')
+        btnRun.onclick = function () {
+            const runBar = document.getElementById('runBar')
+            const runBarNumber = document.getElementById('runBar-number')
+            var timeIntervalID = window.setInterval(function () {
+                const xhr = new XMLHttpRequest()
+                const paramTime = 'todo=getProgress'
+                xhr.open('post', '/getProgress')
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+                xhr.send(paramTime)
+                xhr.onload = function () {
+                    var result = JSON.parse(xhr.responseText)
+                    // console.log(result)
+                    if (result.massage === 'success') {
+                        runBar.style.width = result.progress
+                        runBarNumber.innerHTML = 'processing progress: ' + result.progress
+                    } else {
+                        alert('Unable to get progress, please be patient or try again')
+                    }
 
-    <script type="text/javascript">
-        const label = document.getElementById('label')
-        const btnShowTable = document.getElementById('btnShowTable')
-        btnShowTable.onclick = function () {
-            const labelValue = label.value
-            if (labelValue != '--none--') {
+                }
+            }, [10000])
+
+            var formData = new FormData(uploader)
+            if (formData.get('model') != null) {
+                const xhr = new XMLHttpRequest()
+                const parameter = 'model=' + formData.get('model')
+                xhr.open('post', '/run')
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+                xhr.send(parameter)
+                xhr.onload = function () {
+                    window.clearInterval(timeIntervalID)
+                    const wp2 = document.getElementById('workplace-vor2')
+                    wp2.style.display = 'block'
+                    var result = JSON.parse(xhr.responseText)
+                    // console.log(result)
+                    if (result.massage === 'success') {
+                        const btnRunEnd = document.getElementById('runEnd')
+                        btnRunEnd.style.display = 'block'
+                        btnRunEnd.onclick = function () {
+                            btnRunEnd.style.display = 'none'
+                            const wv = document.getElementById('workplace-vor')
+                            wv.style.display = 'none'
+                            wp2.style.display = 'none'
+                        }
+                        // alert('Run success, please select a file to see result')
+                    } else if (result.massage === 'error') {
+                        alert('Run failed, please wait for the file upload to complete and try again od see README.md to find countermeasures')
+                    } else if (result.massage === 'noData') {
+                        alert('No image uploaded')
+                    }
+                }
+            }
+            else {
+                alert('No model selected')
+            }
+        }
+    </script>
+
+    <script type="text/javascript"> // here is the code block for the function of results visualization
+        // The results will be loaded based on the image selected in the dropdown bar of the visualization module
+        // The query of the processing result will be based on the information stored in the txt file ('assets/imageShow/relation.txt')
+        btnShow.onclick = function () {
+            const imageValue = imageSearch.value
+            if (imageValue === '--none--') {
+                alert('Please select a file to see the result')
+            }
+            else {
+                const xhr = new XMLHttpRequest()
+                const params = 'image=' + imageValue
+                xhr.open('post', '/seeDetail')
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+                xhr.send(params)
+
+                xhr.onload = function () {
+                    var wp_left_hind2 = document.getElementById('wp-left-hind2')
+                    var wp_left_hind = document.getElementById('wp-left-hind')
+                    var wp_left = document.getElementById('wp-left')
+
+                    wp_left_hind2.style.display = 'none'
+                    wp_left.style.display = 'block'
+                    wp_left_hind.style.display = 'none'
+
+                    var result = JSON.parse(xhr.responseText)
+                    var resultKeys = Object.keys(result)
+                    if (result.massage === 'success') {
+                        var imgo = document.createElement('img')
+                        // var i = new Image()
+                        // var naturalWidth, naturalHeight
+                        imgo.src = result.path
+                        // console.log(imgo.src)
+                        imgo.onload = function () {
+
+                            imgo.className = 'image'
+                            // var wp_left = document.getElementById('wp-left')
+                            var child = wp_left.lastElementChild
+                            while (child) {
+                                wp_left.removeChild(child)
+                                child = wp_left.lastElementChild
+                            }
+                            wp_left.appendChild(imgo)
+                        }
+                        var tableSelect = document.getElementById('tableSelect')
+                        var child = tableSelect.lastElementChild
+                        while (child) {
+                            tableSelect.removeChild(child)
+                            child = tableSelect.lastElementChild
+                        }
+                        e_none = document.createElement('option')
+                        e_none.value = "--none--"
+                        e_none.text = '--none--'
+                        tableSelect.appendChild(e_none)
+
+                        for (i = 3; i < resultKeys.length; i++) {
+                            var e = document.createElement("option");
+                            var n = resultKeys[i]
+                            // console.log(n)
+                            // console.log((result[n]))
+                            // console.log((result[n]).split("/"))
+                            e.value = (result[n]).split('imageShow/')[1]
+                            e.text = (result[n]).split('imageShow/')[1]
+                            tableSelect.appendChild(e)
+                        }
+
+                        var img = document.createElement('img')
+                        // var i = new Image()
+                        // var naturalWidth, naturalHeight
+                        img.src = 'imageShow/table_of_' + result.fileName
+                        // console.log(img.src)
+                        img.onload = function () {
+                            img.className = 'image'
+                            // var wp_left_hind = document.getElementById('wp-left-hind')
+                            var child = wp_left_hind.lastElementChild
+                            while (child) {
+                                wp_left_hind.removeChild(child)
+                                child = wp_left_hind.lastElementChild
+                            }
+                            wp_left_hind.appendChild(img)
+                        }
+                    } else {
+                        alert('No data found!! Please make sure the program has finished running')
+                    }
+                }
+            }
+        }
+    </script>
+
+    <script type="text/javascript"> // here is the code block for viewing the table area of the original image by clicking on the visual workspace on the left
+        // Here's a quick visualization with a hidden button and three DIVs stacked on top of each other.
+        // Three DIVs can be alternated by clicking. (display="none" or "block")
+        var hiddenB = document.getElementById('hiddenB');
+        var imageT = document.getElementById('image')
+        var tableSel = document.getElementById('tableSelect')
+        hiddenB.onclick = function () {
+            if (imageT.value != '--none--') {
+                var oriImage = document.getElementById('wp-left')
+                var tableZone = document.getElementById('wp-left-hind')
+                var oneTable = document.getElementById('wp-left-hind2')
+
+                if (tableSel.value == '--none--') {
+                    if (oriImage.style.display == 'none') {
+                        oriImage.style.display = 'block'
+                        tableZone.style.display = 'none'
+                    } else {
+                        oriImage.style.display = 'none'
+                        tableZone.style.display = 'block'
+                    } tableZone
+                } else {
+                    if (oneTable.style.display == 'block') {
+                        oriImage.style.display = 'block'
+                        tableZone.style.display = 'none'
+                        oneTable.style.display = 'none'
+                    } else if (oriImage.style.display == 'block') {
+                        oriImage.style.display = 'none'
+                        tableZone.style.display = 'block'
+                        oneTable.style.display = 'none'
+                    } else if (tableZone.style.display == 'block') {
+                        oriImage.style.display = 'none'
+                        tableZone.style.display = 'none'
+                        oneTable.style.display = 'block'
+                    }
+                }
+            } else {
+                alert('Please select the object to be visualized in the left menu first')
+            }
+        }
+    </script>
+
+    <script type="text/javascript"> // here is the code block for the 'Drop-down selection bar above left workspace'
+        // The data will be queried according to the selected id and processed into a table to return the results in the right workspace
+        var tableSelect = document.getElementById('tableSelect')
+        tableSelect.onchange = function () {
+            const tableSelectValue = tableSelect.value
+            if (tableSelectValue != '--none--') {
                 const xhr = new XMLHttpRequest()
                 const idxValue = 'table'
-                const params = 'idx=' + idxValue + '&label=' + labelValue
-                xhr.open('post', '/returnSearch')
+                const params = 'idx=' + idxValue + '&label=' + tableSelectValue
+                xhr.open('post', '/search')
                 xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
                 xhr.send(params)
                 xhr.onload = function () {
@@ -798,17 +872,171 @@
                             }
                         }
                         txt += "</table>"
-                        document.getElementById("tableZone").innerHTML = txt;
+                        document.getElementById("wp-right").innerHTML = txt;
+
+                        //creatimage src=result.label
+                        var img = document.createElement('img')
+                        // var i = new Image()
+                        // var naturalWidth, naturalHeight
+                        img.src = 'imageShow/' + result.label
+                        // console.log(img.src)
+                        img.onload = function () {
+                            img.className = 'image'
+                            var wp_left_hind2 = document.getElementById('wp-left-hind2')
+                            var wp_left_hind = document.getElementById('wp-left-hind')
+                            var wp_left = document.getElementById('wp-left')
+                            var child = wp_left_hind2.lastElementChild
+                            while (child) {
+                                wp_left_hind2.removeChild(child)
+                                child = wp_left_hind2.lastElementChild
+                            }
+                            wp_left_hind2.appendChild(img)
+                            wp_left.style.display = 'none'
+                            wp_left_hind.style.display = 'none'
+                            wp_left_hind2.style.display = 'block'
+                        }
                     }
                 }
             }
+            else {
+                alert('Please select a table of the image')
+            }
         }
-
     </script>
 
-    <script type="text/javascript">
-        const btnRenew = document.getElementById('btnRenew')
-        btnRenew.onclick = function () {
+    <script type="text/javascript"> // here is the code block for the function of 'continue the interrupted work'
+        // Breakpoint loading will be completed based on the processed image ('assets/imageShow/relation.txt') and all images in the backend ('assets/uploads/originalName.txt')
+        const btnContinue = document.getElementById('continue')
+        btnContinue.onclick = function () {
+            var mg = confirm('The last unfinished task will be load')
+            if (mg) {
+                // const wv = document.getElementById('workplace-vor')
+                // wv.style.display = 'none'
+                const xhr = new XMLHttpRequest()
+                const params = 'todo=continue'
+                xhr.open('post', '/continue')
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+                xhr.send(params)
+                xhr.onload = function () {
+                    var result = JSON.parse(xhr.responseText)
+                    if (result.massage === 'success') {
+                        const runBar = document.getElementById('runBar')
+                        const runBarNumber = document.getElementById('runBar-number')
+                        runBar.style.width = result.progress
+                        runBarNumber.innerHTML = 'processing progress: ' + result.progress
+
+                        var label_list = eval(result.fileName)
+                        var label_oldoptions = document.getElementById('image').options
+                        var label_old = []
+                        for (let i = 0; i < label_oldoptions.length; i++) {
+                            label_old.push(label_oldoptions[i].value)
+                        }
+                        // console.log(label_old)
+                        for (let i = 0; i < label_list.length; i++) {
+                            if (label_old.indexOf(label_list[i]) === -1) {
+                                var label_new = label_list[i]
+                                var board = document.getElementById("image");
+                                var e = document.createElement("option");
+                                e.value = label_new
+                                e.text = label_new
+                                var object = board.appendChild(e);
+                            }
+                        }
+                        const wv = document.getElementById('workplace-vor')
+                        wv.style.display = 'block'
+                        alert('Breakpoint loading success')
+
+                        var timeIntervalID2 = window.setInterval(function () {
+                            const xhr = new XMLHttpRequest()
+                            const paramTime = 'todo=getProgress'
+                            xhr.open('post', '/getProgress')
+                            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+                            xhr.send(paramTime)
+                            xhr.onload = function () {
+                                var result = JSON.parse(xhr.responseText)
+                                // console.log(result)
+                                if (result.massage === 'success') {
+                                    runBar.style.width = result.progress
+                                    runBarNumber.innerHTML = 'processing progress: ' + result.progress
+                                } else {
+                                    alert('Unable to get progress, please be patient or try again')
+                                }
+
+                            }
+                        }, [10000])
+
+                        const xhr = new XMLHttpRequest()
+                        const params = 'todo=continueRun'
+                        xhr.open('post', '/continueRun')
+                        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+                        xhr.send(params)
+                        xhr.onload = function () {
+                            window.clearInterval(timeIntervalID2)
+                            const wp2 = document.getElementById('workplace-vor2')
+                            wp2.style.display = 'block'
+
+                            var result = JSON.parse(xhr.responseText)
+                            // console.log(result)
+                            if (result.massage === 'success') {
+                                // alert('continue run success')
+                                const btnRunEnd = document.getElementById('runEnd')
+                                btnRunEnd.style.display = 'block'
+                                btnRunEnd.onclick = function () {
+                                    btnRunEnd.style.display = 'none'
+                                    const wv = document.getElementById('workplace-vor')
+                                    wv.style.display = 'none'
+                                    wp2.style.display = 'none'
+                                }
+
+                            } else {
+                                alert('continue run error')
+                                const wv = document.getElementById('workplace-vor')
+                                wv.style.display = 'none'
+                            }
+                        }
+
+                    } else {
+                        alert('Breakpoint loading failed')
+                    }
+                }
+            }
+            else {
+                alert('Abandon loading, please remember to clear the data so as not to affect subsequent tasks.')
+            }
+        }
+    </script>
+
+    <script type="text/javascript"> // here is the code block for the function of 'clean all data in the backend'
+        // The backend will be initialized, all txt file contents will be emptied, and all downloaded images and image processing results will be deleted
+        const btnCleanAll = document.getElementById('cleanAll')
+        btnCleanAll.onclick = function () {
+            var ms = confirm('This will clear all data on the backend, do you choose to continue?')
+            if (ms) {
+                const xhr = new XMLHttpRequest()
+                const params = 'todo=cleanAll'
+                xhr.open('post', '/clean')
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+                xhr.send(params)
+
+                xhr.onload = function () {
+                    var result = JSON.parse(xhr.responseText)
+                    if (result.massage === 'success') {
+                        alert('Backend has been initialized')
+                    } else {
+                        alert('Data clear failed')
+                    }
+                }
+            }
+            else {
+                alert('Data keeping')
+            }
+        }
+    </script>
+
+    <script type="text/javascript"> // here is the code block for the function of 'LOAD database'
+        // Will load all the uniqueIDs in the index 'table' into the following two drop-down bars ('--select uniqueID--' and '--save as Excel--')
+        const btnLOAD = document.getElementById('btnLOAD')
+        btnLOAD.onclick = function () {
             const wv = document.getElementById('workplace-vor')
             wv.style.display = 'none'
             const xhr = new XMLHttpRequest()
@@ -866,192 +1094,18 @@
         }
     </script>
 
-
-    <div id="workplace-for-ela" class="work-place" style="display:none">
-        <div id='tableZone' class="tableZone"></div>
-    </div>
-
-    <div id='workplace' class="work-place" style="display: block">
-
-        <div id='showArea' class="table-select">
-            Click on image to view table area<br>
-            Select the table of the image to see the details:
-            <select id="tableSelect">
-                <option value="--none--" selected>--none--</option>
-            </select>
-        </div>
-        <input type="button" id="hiddenB" class="hidden-button">
-        <div id='wp-left' class="wp-left" style="display:block">
-
-        </div>
-        <div id="wp-left-hind" class="wp-left" style="display:none">
-
-        </div>
-
-        <div id="wp-left-hind2" class="wp-left" style="display:none">
-
-        </div>
-
-        <div id='wp-right' class="wp-right">
-
-        </div>
-    </div>
-    <div id='workplace-vor' class="work-place" style="display: block; background-color: beige;text-align: center;">
-        <div class='runBar-outside'>
-            <div id='runBar' class="runBar" style="width: 0%;"></div>
-        </div>
-        <div id='runBar-number' class="bar-number" style="font-family: Aril;font-size:20px;">processing progress: 0%
-        </div>
-    </div>
-    <div id='workplace-vor2' class="work-place" style="display: none; background-color: beige;text-align: center;">
-        <div class='runBar-outside'>
-            <div id='runBar2' class="runBar" style="width: 100%;"></div>
-        </div>
-        <div id='runBar-number2' class="bar-number" style="font-family: Aril;font-size:20px;">processing progress: 100%
-        </div>
-    </div>
-    <input type="button" id="runEnd" class='runEndButton' value="Run success, click to continue
-    ">
-
-    <script type="text/javascript">
-
-        btnRun.onclick = function () {
-            const runBar = document.getElementById('runBar')
-            const runBarNumber = document.getElementById('runBar-number')
-            var timeIntervalID = window.setInterval(function () {
-                const xhr = new XMLHttpRequest()
-                const paramTime = 'todo=getProgress'
-                xhr.open('post', '/getProgress')
-                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
-                xhr.send(paramTime)
-                xhr.onload = function () {
-                    var result = JSON.parse(xhr.responseText)
-                    // console.log(result)
-                    if (result.massage === 'success') {
-                        runBar.style.width = result.progress
-                        runBarNumber.innerHTML = 'processing progress: ' + result.progress
-                    } else {
-                        alert('Unable to get progress, please be patient or try again')
-                    }
-
-                }
-            }, [10000])
-
-            var formData = new FormData(uploader)
-            if (formData.get('model') != null) {
-                const xhr = new XMLHttpRequest()
-                const parameter = 'model=' + formData.get('model')
-                xhr.open('post', '/run')
-                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
-                xhr.send(parameter)
-                xhr.onload = function () {
-                    window.clearInterval(timeIntervalID)
-                    const wp2 = document.getElementById('workplace-vor2')
-                    wp2.style.display = 'block'
-                    var result = JSON.parse(xhr.responseText)
-                    // console.log(result)
-                    if (result.massage === 'success') {
-                        const btnRunEnd = document.getElementById('runEnd')
-                        btnRunEnd.style.display = 'block'
-                        btnRunEnd.onclick = function () {
-                            btnRunEnd.style.display = 'none'
-                            const wv = document.getElementById('workplace-vor')
-                            wv.style.display = 'none'
-                            wp2.style.display = 'none'
-                        }
-                        // alert('Run success, please select a file to see result')
-                    } else if (result.massage === 'error') {
-                        alert('Run failed, please wait for the file upload to complete and try again od see README.md to find countermeasures')
-                    } else if (result.massage === 'noData') {
-                        alert('No image uploaded')
-                    }
-
-                }
-            }
-            else {
-                alert('No model selected')
-            }
-        }
-
-        const kontroler = document.getElementById('runBar')
-
-        // if (kontroler.style.width == '100%') {
-        //     const wv = document.getElementById('workplace-vor')
-        //     wv.style.display = 'none'
-        // }
-    </script>
-
-    <script type="text/javascript">
-        var btnReturn = document.getElementById('return')
-        var wp = document.getElementById('workplace')
-        var wpforEla = document.getElementById('workplace-for-ela')
-        var menu = document.getElementById('menu-box')
-        var menuHind = document.getElementById('menu-box-hind')
-        btnReturn.onclick = function () {
-
-            wp.style.display = 'block'
-            wpforEla.style.display = 'none'
-            menu.style.display = 'block'
-            menuHind.style.display = 'none'
-        }
-        var btnTurn = document.getElementById('turn')
-        btnTurn.onclick = function () {
-
-            wp.style.display = 'none'
-            wpforEla.style.display = 'block'
-            menu.style.display = 'none'
-            menuHind.style.display = 'block'
-        }
-    </script>
-
-    <script type="text/javascript">
-        var hiddenB = document.getElementById('hiddenB');
-        var imageT = document.getElementById('image')
-        var tableSel = document.getElementById('tableSelect')
-        hiddenB.onclick = function () {
-            if (imageT.value != '--none--') {
-                var oriImage = document.getElementById('wp-left')
-                var tableZone = document.getElementById('wp-left-hind')
-                var oneTable = document.getElementById('wp-left-hind2')
-
-                if (tableSel.value == '--none--') {
-                    if (oriImage.style.display == 'none') {
-                        oriImage.style.display = 'block'
-                        tableZone.style.display = 'none'
-                    } else {
-                        oriImage.style.display = 'none'
-                        tableZone.style.display = 'block'
-                    } tableZone
-                } else {
-                    if (oneTable.style.display == 'block') {
-                        oriImage.style.display = 'block'
-                        tableZone.style.display = 'none'
-                        oneTable.style.display = 'none'
-                    } else if (oriImage.style.display == 'block') {
-                        oriImage.style.display = 'none'
-                        tableZone.style.display = 'block'
-                        oneTable.style.display = 'none'
-                    } else if (tableZone.style.display == 'block') {
-                        oriImage.style.display = 'none'
-                        tableZone.style.display = 'none'
-                        oneTable.style.display = 'block'
-                    }
-                }
-            } else {
-                alert('Please select the object to be visualized in the left menu first')
-            }
-        }
-    </script>
-
-    <script type="text/javascript">
-        var tableSelect = document.getElementById('tableSelect')
-        tableSelect.onchange = function () {
-            const tableSelectValue = tableSelect.value
-            if (tableSelectValue != '--none--') {
+    <script type="text/javascript"> // here is the code block for the function of 'select uniqueID and SHOW'
+        // same as the code block for the 'Drop-down selection bar above left workspace'
+        // But the searched table will be loaded into elasticsearch workspace
+        const label = document.getElementById('label')
+        const btnShowTable = document.getElementById('btnShowTable')
+        btnShowTable.onclick = function () {
+            const labelValue = label.value
+            if (labelValue != '--none--') {
                 const xhr = new XMLHttpRequest()
                 const idxValue = 'table'
-                const params = 'idx=' + idxValue + '&label=' + tableSelectValue
-                xhr.open('post', '/returnSearch')
+                const params = 'idx=' + idxValue + '&label=' + labelValue
+                xhr.open('post', '/search')
                 xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
                 xhr.send(params)
                 xhr.onload = function () {
@@ -1086,143 +1140,126 @@
                             }
                         }
                         txt += "</table>"
-                        document.getElementById("wp-right").innerHTML = txt;
-
-                        //creatimage src=result.label
-                        var img = document.createElement('img')
-                        // var i = new Image()
-                        // var naturalWidth, naturalHeight
-                        img.src = 'imageShow/' + result.label
-                        // console.log(img.src)
-                        img.onload = function () {
-                            // naturalWidth = this.width
-                            // naturalHeight = this.height
-                            // if (naturalHeight >= naturalWidth) {
-                            //     img.className = 'imageHeight'
-                            // } else {
-                            //     img.className = 'imageWidth'
-                            // }
-                            img.className = 'image'
-                            var wp_left_hind2 = document.getElementById('wp-left-hind2')
-                            var wp_left_hind = document.getElementById('wp-left-hind')
-                            var wp_left = document.getElementById('wp-left')
-                            var child = wp_left_hind2.lastElementChild
-                            while (child) {
-                                wp_left_hind2.removeChild(child)
-                                child = wp_left_hind2.lastElementChild
-                            }
-                            wp_left_hind2.appendChild(img)
-                            wp_left.style.display = 'none'
-                            wp_left_hind.style.display = 'none'
-                            wp_left_hind2.style.display = 'block'
-                        }
+                        document.getElementById("tableZone").innerHTML = txt;
                     }
                 }
-            }
-            else {
-                alert('Please select a table of the image')
             }
         }
     </script>
 
-    <script type="text/javascript">
-        const btnContinue = document.getElementById('continue')
-        btnContinue.onclick = function () {
-            var mg = confirm('The last unfinished task will be load')
-            if (mg) {
-                // const wv = document.getElementById('workplace-vor')
-                // wv.style.display = 'none'
+    <script type="text/javascript"> // here is the code block for the function of 'save as Excel'
+        // If all is selected, each table will be distinguished by sheet name
+        const btnSaveExcel = document.getElementById('saveExcel')
+        btnSaveExcel.onclick = function () {
+            const tableId = document.getElementById('selectExcel')
+            if (tableId.value === '--none--') {
+                alert('Please load database at first')
+            }
+            else {
                 const xhr = new XMLHttpRequest()
-                const params = 'todo=continue'
-                xhr.open('post', '/continue')
+                const params = 'todo=saveExcel' + '&tableId=' + tableId.value
+                // console.log(tableId.value)
+                // console.log(params)
+                xhr.open('post', '/saveExcel')
                 xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
                 xhr.send(params)
+
                 xhr.onload = function () {
                     var result = JSON.parse(xhr.responseText)
                     if (result.massage === 'success') {
-                        const runBar = document.getElementById('runBar')
-                        const runBarNumber = document.getElementById('runBar-number')
-                        runBar.style.width = result.progress
-                        runBarNumber.innerHTML = 'processing progress: ' + result.progress
-
-                        var label_list = eval(result.fileName)
-                        var label_oldoptions = document.getElementById('image').options
-                        var label_old = []
-                        for (let i = 0; i < label_oldoptions.length; i++) {
-                            label_old.push(label_oldoptions[i].value)
-                        }
-                        // console.log(label_old)
-                        for (let i = 0; i < label_list.length; i++) {
-                            if (label_old.indexOf(label_list[i]) === -1) {
-                                var label_new = label_list[i]
-                                var board = document.getElementById("image");
-                                var e = document.createElement("option");
-                                e.value = label_new
-                                e.text = label_new
-                                var object = board.appendChild(e);
-                            }
-                        }
-                        const wv = document.getElementById('workplace-vor')
-                        wv.style.display = 'block'
-                        alert('Breakpoint loading success')
-                        
-                        var timeIntervalID2 = window.setInterval(function () {
-                            const xhr = new XMLHttpRequest()
-                            const paramTime = 'todo=getProgress'
-                            xhr.open('post', '/getProgress')
-                            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
-                            xhr.send(paramTime)
-                            xhr.onload = function () {
-                                var result = JSON.parse(xhr.responseText)
-                                // console.log(result)
-                                if (result.massage === 'success') {
-                                    runBar.style.width = result.progress
-                                    runBarNumber.innerHTML = 'processing progress: ' + result.progress
-                                } else {
-                                    alert('Unable to get progress, please be patient or try again')
-                                }
-
-                            }
-                        }, [10000])
-
-                        const xhr = new XMLHttpRequest()
-                        const params = 'todo=continueRun'
-                        xhr.open('post', '/continueRun')
-                        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
-                        xhr.send(params)
-                        xhr.onload = function () {
-                            window.clearInterval(timeIntervalID2)
-                            const wp2 = document.getElementById('workplace-vor2')
-                            wp2.style.display = 'block'
-
-                            var result = JSON.parse(xhr.responseText)
-                            // console.log(result)
-                            if (result.massage === 'success') {
-                                // alert('continue run success')
-                                const btnRunEnd = document.getElementById('runEnd')
-                                btnRunEnd.style.display = 'block'
-                                btnRunEnd.onclick = function () {
-                                    btnRunEnd.style.display = 'none'
-                                    const wv = document.getElementById('workplace-vor')
-                                    wv.style.display = 'none'
-                                    wp2.style.display='none'
-                                }
-
-                            } else {
-                                alert('continue run error')
-                                const wv = document.getElementById('workplace-vor')
-                                wv.style.display = 'none'
-                            }
-                        }
-
+                        const down = document.getElementById('download')
+                        const dd = document.getElementById('dd')
+                        dd.style.display = 'block'
+                        down.href = 'http://127.0.0.1:3000/excelStore/' + result.excelName
+                        // console.log(down.href)
+                        down.download = result.excelName
+                        down.text = result.excelName
+                        alert('save Excel success')
                     } else {
-                        alert('Breakpoint loading failed')
+                        alert('failed to save Excel')
+                    }
+                }
+            }
+        }
+    </script>
+
+    <script type="text/javascript"> // here is the code block for the function of 'clean all the data in Elasticsearch'
+        // will clear all data under index 'table'
+        const btnCleanEla = document.getElementById('cleanEla')
+        btnCleanEla.onclick = function () {
+            var ms = confirm('This will clear all data on the elasticsearch unter index "table", do you choose to continue?')
+            if (ms) {
+                const xhr = new XMLHttpRequest()
+                const params = 'todo=cleanEla'
+                xhr.open('post', '/clean')
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+                xhr.send(params)
+
+                xhr.onload = function () {
+                    var result = JSON.parse(xhr.responseText)
+                    if (result.massage === 'success') {
+                        alert('data of index "table" has been cleand')
+                    } else {
+                        alert('Data clear failed')
                     }
                 }
             }
             else {
-                alert('Abandon loading, please remember to clear the data so as not to affect subsequent tasks.')
+                alert('Data keeping')
             }
+        }
+    </script>
+
+    <script type="text/javascript"> // here is the code block for the function of button '(turn to) ELASTICSEARCH' and 'RETURN TO VISUALIZATION'
+        // This is achieved by toggling the display property of the two menus ('none' and 'block')
+        var btnReturn = document.getElementById('return')
+        var wp = document.getElementById('workplace')
+        var wpforEla = document.getElementById('workplace-for-ela')
+        var wpv = document.getElementById('workplace-vor')
+        var wpv2 = document.getElementById('workplace-vor2')
+        var menu = document.getElementById('menu-box')
+        var menuHind = document.getElementById('menu-box-hind')
+        var btnTurn = document.getElementById('turn')
+
+        var wp_last
+        var wpv_last
+        var wpv2_last
+
+        btnReturn.onclick = function () {
+
+            if (wp_last) {
+                wp.style.display = wp_last
+                wpv.style.display = wpv_last
+                wpv2.style.display = wpv2_last
+                menu.style.display = 'block'
+
+                wpforEla.style.display = 'none'
+                menuHind.style.display = 'none'
+
+            } else {
+                wp.style.display = 'block'
+                wpv.style.display = 'block'
+                wpv2.style.display = 'none'
+                menu.style.display = 'block'
+
+                wpforEla.style.display = 'none'
+                menuHind.style.display = 'none'
+            }
+        }
+
+        btnTurn.onclick = function () {
+
+            wp_last = wp.style.display
+            wpv_last = wpv.style.display
+            wpv2_last = wpv2.style.display
+
+            wp.style.display = 'none'
+            wpv.style.display = 'none'
+            wpv2.style.display = 'none'
+            menu.style.display = 'none'
+
+            wpforEla.style.display = 'block'
+            menuHind.style.display = 'block'
         }
     </script>
 
