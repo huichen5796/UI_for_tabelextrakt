@@ -1,1 +1,0 @@
-{'file': 'test17.png', 'tableNumber': '1'}
