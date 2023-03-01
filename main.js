@@ -1,7 +1,7 @@
 const express = require('express');    /*ähnlich wie import in Python*/
 const path = require('path')
 const hostname = '127.0.0.1'
-const port = 3000;
+const port = 4200;
 const router = require('./router.js')
 const cors = require('cors')
 
