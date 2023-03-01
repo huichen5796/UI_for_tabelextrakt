@@ -21,7 +21,7 @@ It is planned that the _Ajax_ and _Javascript_ parts will be migrated to _Angula
 
 - Start Server use `nodemon main.js` in **Terminal**
 
-- Server runs on http://127.0.0.1:3000/
+- Server runs on http://127.0.0.1:4200/
 
 ## Webpage
 
